@@ -206,9 +206,17 @@ define([
             return this._dragEl[0];
         },
 
-        onDragEnd: function() {
+        onDragEnd: function(event) {
             this._dragEl && this._dragEl.remove();
             this._dragEl = null;
+
+            if (event && event.originalEvent.dataTransfer.dropEffect === "none") {
+                if (this.fromListView === 'pivot-list-values' && _.isNumber(this.itemIndex)) {
+                    this.onRemove(this.pivotIndex, this.itemIndex);
+                } else {
+                    this.onRemove(this.pivotIndex);
+                }
+            }
         },
 
         onFieldsDragStart: function (item, index, event) {

@@ -45,6 +45,7 @@ define([
     'jquery',
     'underscore',
     'backbone',
+    'documenteditor/main/app/template/compiled/Viewport.template',
     'common/main/lib/component/Layout'
 ], function (viewportTemplate, $, _, Backbone) {
     'use strict';
@@ -53,7 +54,8 @@ define([
         el: '#viewport',
 
         // Compile our stats template
-        template: _.template(viewportTemplate),
+        // template: _.template(viewportTemplate),
+        template: Handlebars.templates.Viewport,
 
         // Delegated events for creating new items, and clearing completed ones.
         events: {

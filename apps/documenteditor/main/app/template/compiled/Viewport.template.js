@@ -1,0 +1,6 @@
+(function() {
+  var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};
+templates['Viewport'] = template({"compiler":[8,">= 4.3.0"],"main":function(container,depth0,helpers,partials,data) {
+    return "<div class=\"layout-region\">\r\n    <div id=\"viewport-vbox-layout\" class=\"layout-ct vbox \">\r\n        <section class=\"layout-ct\">\r\n            <div id=\"file-menu-panel\" class=\"toolbar-fullview-panel\" style=\"display:none;\"></div>\r\n        </section>\r\n        <section id=\"app-title\" class=\"layout-item\"></section>\r\n        <div id=\"toolbar\" class=\"layout-item\"></div>\r\n        <div class=\"layout-item middle\">\r\n            <div id=\"viewport-hbox-layout\" class=\"layout-ct hbox\">\r\n                <div id=\"left-menu\" class=\"layout-item\" style=\"width: 40px;\"></div>\r\n                <div id=\"about-menu-panel\" class=\"left-menu-full-ct\" style=\"display:none;\"></div>\r\n                <div id=\"editor-container\" class=\"layout-item\"><div id=\"editor_sdk\"></div></div>\r\n                <div id=\"right-menu\" class=\"layout-item\"></div>\r\n                <div id=\"left-panel-history\" class=\"layout-item\"></div>\r\n            </div>\r\n        </div>\r\n        <div id=\"statusbar\" class=\"layout-item\"></div>\r\n    </div>\r\n</div>\r\n";
+},"useData":true});
+})();

@@ -59,6 +59,7 @@ define([
     'common/main/lib/component/ComboDataView'
     ,'common/main/lib/component/SynchronizeTip'
     ,'common/main/lib/component/Mixtbar'
+    ,'documenteditor/main/app/template/compiled/Toolbar.template'
 ], function ($, _, Backbone, template, template_view) {
     'use strict';
 
@@ -106,8 +107,9 @@ define([
                 var me = this;
 
                 if ( config.isEdit ) {
+                    var _tpl = !!JST ? JST['Toolbar'] : undefined;
                     Common.UI.Mixtbar.prototype.initialize.call(this, {
-                            template: _.template(template),
+                            template:  _tpl || _.template(template),
                             tabs: [
                                 {caption: me.textTabFile, action: 'file', extcls: 'canedit', haspanel:false},
                                 {caption: me.textTabHome, action: 'home', extcls: 'canedit'},
@@ -1730,7 +1732,12 @@ define([
                         restoreHeight: 421,
                         groups: new Common.UI.DataViewGroupStore(Common.define.chartData.getChartGroupData(true)),
                         store: new Common.UI.DataViewStore(Common.define.chartData.getChartData()),
-                        itemTemplate: _.template('<div id="<%= id %>" class="item-chartlist"><svg width="40" height="40" class=\"icon\"><use xlink:href=\"#chart-<%= iconCls %>\"></use></svg></div>')
+                        // itemTemplate: _.template('<div id="<%= id %>" class="item-chartlist"><svg width="40" height="40" class=\"icon\"><use xlink:href=\"#chart-<%= iconCls %>\"></use></svg></div>')
+                        itemTemplate: Handlebars.compile('<div id="{{id}}" class="item-chartlist">' +
+                                                            '<svg width="40" height="40" class=\"icon\">' +
+                                                                '<use xlink:href=\"#chart-{{iconCls}}\"></use>' +
+                                                            '</svg>' +
+                                                        '</div>')
                     });
                     picker.on('item:click', function (picker, item, record, e) {
                         if (record)

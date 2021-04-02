@@ -36,6 +36,12 @@ class SearchSettings extends SearchSettingsView {
                         <ListItem radio title={_t.textFind} name="find-replace-checkbox" checked={!this.state.useReplace} onClick={e => this.onFindReplaceClick('find')} />
                         <ListItem radio title={_t.textFindAndReplace} name="find-replace-checkbox" checked={this.state.useReplace} onClick={e => this.onFindReplaceClick('replace')} />
                     </List>
+                    {Device.isPhone ? (
+                        <List>
+                            <ListItem checkbox checked={this.state.isReplaceAll} title={_t.textReplaceAll} 
+                                onChange={() => this.onSwitchReplaceMode(!this.state.isReplaceAll)}></ListItem>
+                        </List>
+                    ) : null}
                     <List>
                         <ListItem title={_t.textCaseSensitive}>
                             <Toggle slot="after" className="toggle-case-sensitive" />

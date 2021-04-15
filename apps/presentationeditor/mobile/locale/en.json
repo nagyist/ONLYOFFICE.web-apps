@@ -91,7 +91,8 @@
       "textCaseSensitive": "Case Sensitive",
       "textHighlight": "Highlight Results",
       "textReplace": "Replace",
-      "textNoTextFound": "Text not Found"
+      "textNoTextFound": "Text not Found",
+      "textFindAndReplaceAll": "Find and Replace All"
     },
     "Add": {
       "textSlide": "Slide",

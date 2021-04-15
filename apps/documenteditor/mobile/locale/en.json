@@ -248,7 +248,8 @@
     "textReplaceAll": "Replace All",
     "textCaseSensitive": "Case Sensitive",
     "textHighlightResults": "Highlight Results",
-    "textSearch": "Search"
+    "textSearch": "Search",
+    "textFindAndReplaceAll": "Find and Replace All"
   },
   "Edit": {
     "textClose": "Close",

@@ -300,7 +300,7 @@ class SearchView extends Component {
                                 <i className="icon icon-settings" />
                             </a>
                         </div>
-                        <div className="buttons-row-replace">
+                        <div className="buttons-row-replace" style={!Device.isPhone ? {paddingRight: '14px'} : null}>
                             {!Device.isPhone && usereplace ? (
                                 <Fragment>
                                     <a id="replace-link" className={"link " + (searchQuery.trim().length ? "" : "disabled")} onClick={() => this.onReplaceClick()}>{_t.textReplace}</a>

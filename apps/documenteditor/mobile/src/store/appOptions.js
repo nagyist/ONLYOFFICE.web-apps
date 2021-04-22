@@ -8,13 +8,36 @@ export class storeAppOptions {
             canReview: observable,
             setConfigOptions: action,
             setPermissionOptions: action,
-            setCanViewReview: action
+
+            canViewReview: observable,
+            setCanViewReview: action,
+
+            lostEditingRights: observable,
+            changeEditingRights: action,
+
+            readerMode: observable,
+            changeReaderMode: action,
+
+            canBrandingExt: observable
         });
     }
 
     isEdit = false;
     canViewComments = false;
     canReview = false;
+    canViewReview = false;
+
+    lostEditingRights = false;
+    changeEditingRights (value) {
+        this.lostEditingRights = value;
+    }
+
+    readerMode = false;
+    changeReaderMode () {
+        this.readerMode = !this.readerMode;
+    }
+
+    canBrandingExt = false;
 
     config = {};
     setConfigOptions (config) {

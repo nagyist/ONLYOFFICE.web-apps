@@ -9,12 +9,12 @@ import {InitReviewController as ReviewController} from '../../../../common/mobil
 import { onAdvancedOptions } from './settings/Download.jsx';
 import {
     CommentsController,
-    AddCommentController,
-    EditCommentController,
     ViewCommentsController
 } from "../../../../common/mobile/lib/controller/collaboration/Comments";
 import About from '../../../../common/mobile/lib/view/About';
 import EditorUIController from '../lib/patch';
+import ErrorController from "./Error";
+import LongActionsController from "./LongActions";
 
 @inject(
     "storeAppOptions",
@@ -24,16 +24,23 @@ import EditorUIController from '../lib/patch';
     "storeParagraphSettings",
     "storeTableSettings",
     "storeDocumentInfo",
-    "storeChartSettings"
+    "storeChartSettings",
+    "storeApplicationSettings"
     )
 class MainController extends Component {
     constructor(props) {
         super(props);
         window.editorType = 'de';
 
+        this.LoadingDocument = -256;
+
         this._state = {
-            licenseType: false
+            licenseType: false,
+            isFromGatewayDownloadAs: false,
+            isDocModified: false
         };
+
+        this.defaultTitleText = __APP_TITLE_TEXT__;
 
         const { t } = this.props;
         this._t = t('Main', {returnObjects:true});
@@ -75,6 +82,15 @@ class MainController extends Component {
 
                 this.editorConfig.lang && this.api.asc_setLocale(this.editorConfig.lang);
 
+                let value = LocalStorage.getItem("de-mobile-macros-mode");
+                if (value === null) {
+                    value = this.editorConfig.customization ? this.editorConfig.customization.macrosMode : 'warn';
+                    value = (value === 'enable') ? 1 : (value === 'disable' ? 2 : 0);
+                } else {
+                    value = parseInt(value);
+                }
+                this.props.storeApplicationSettings.changeMacrosSettings(value);
+
                 Common.Notifications.trigger('configOptionsFill');
             };
 
@@ -106,21 +122,21 @@ class MainController extends Component {
                     docInfo.put_Permissions(_permissions);
                     docInfo.put_EncryptedInfo(this.editorConfig.encryptionKeys);
 
-                    // var enable = !this.editorConfig.customization || (this.editorConfig.customization.macros!==false);
-                    // docInfo.asc_putIsEnabledMacroses(!!enable);
-                    // enable = !this.editorConfig.customization || (this.editorConfig.customization.plugins!==false);
-                    // docInfo.asc_putIsEnabledPlugins(!!enable);
+                    let enable = !this.editorConfig.customization || (this.editorConfig.customization.macros !== false);
+                    docInfo.asc_putIsEnabledMacroses(!!enable);
+                    enable = !this.editorConfig.customization || (this.editorConfig.customization.plugins !== false);
+                    docInfo.asc_putIsEnabledPlugins(!!enable);
 
-                    // let type = /^(?:(pdf|djvu|xps))$/.exec(data.doc.fileType);
-                    // if (type && typeof type[1] === 'string') {
-                    //     this.permissions.edit = this.permissions.review = false;
-                    // }
+                    const type = /^(?:(pdf|djvu|xps))$/.exec(data.doc.fileType);
+                    if (type && typeof type[1] === 'string') {
+                        this.permissions.edit = this.permissions.review = false;
+                    }
                 }
 
                 this.api.asc_registerCallback('asc_onGetEditorPermissions', onEditorPermissions);
                 this.api.asc_registerCallback('asc_onDocumentContentReady', onDocumentContentReady);
                 this.api.asc_registerCallback('asc_onLicenseChanged', this.onLicenseChanged.bind(this));
-                // this.api.asc_registerCallback('asc_onRunAutostartMacroses', _.bind(this.onRunAutostartMacroses, this));
+                this.api.asc_registerCallback('asc_onRunAutostartMacroses', this.onRunAutostartMacroses.bind(this));
                 this.api.asc_setDocInfo(docInfo);
                 this.api.asc_getEditorPermissions(this.editorConfig.licenseUrl, this.editorConfig.customerId);
 
@@ -173,14 +189,62 @@ class MainController extends Component {
             };
 
             const onDocumentContentReady = () => {
-                this.applyLicense();
+                if (this._isDocReady)
+                    return;
 
-                Common.Gateway.documentReady();
+                const appOptions = this.props.storeAppOptions;
+                const appSettings = this.props.storeApplicationSettings;
+
                 f7.emit('resize');
 
-                Common.Notifications.trigger('document:ready');
-
                 this._isDocReady = true;
+
+                this.api.SetDrawingFreeze(false);
+
+                Common.Notifications.trigger('preloader:close');
+                Common.Notifications.trigger('preloader:endAction', Asc.c_oAscAsyncActionType['BlockInteraction'], this.LoadingDocument);
+
+                let value = LocalStorage.getItem("de-settings-zoom");
+                const zf = (value !== null) ? parseInt(value) : (appOptions.customization && appOptions.customization.zoom ? parseInt(appOptions.customization.zoom) : 100);
+                (zf === -1) ? this.api.zoomFitToPage() : ((zf === -2) ? this.api.zoomFitToWidth() : this.api.zoom(zf>0 ? zf : 100));
+
+                value = LocalStorage.getBool("de-mobile-spellcheck", !(appOptions.customization && appOptions.customization.spellcheck === false));
+                appSettings.changeSpellCheck(value);
+                this.api.asc_setSpellCheck(value);
+
+                this.updateWindowTitle(true);
+
+                this.api.SetTextBoxInputMode(LocalStorage.getBool("de-settings-inputmode"));
+
+                value = LocalStorage.getBool("de-mobile-no-characters");
+                appSettings.changeNoCharacters(value);
+                this.api.put_ShowParaMarks(value);
+
+                value = LocalStorage.getBool("de-mobile-hidden-borders");
+                appSettings.changeShowTableEmptyLine(value);
+                this.api.put_ShowTableEmptyLine(value);
+
+                if (appOptions.isEdit && this.needToUpdateVersion) {
+                    Common.Notifications.trigger('api:disconnect');
+                }
+
+                Common.Gateway.on('processsaveresult', this.onProcessSaveResult.bind(this));
+                Common.Gateway.on('processrightschange', this.onProcessRightsChange.bind(this));
+                Common.Gateway.on('downloadas', this.onDownloadAs.bind(this));
+                Common.Gateway.on('requestclose', this.onRequestClose.bind(this));
+
+                Common.Gateway.sendInfo({
+                    mode: appOptions.isEdit ? 'edit' : 'view'
+                });
+
+                this.api.Resize();
+                this.api.zoomFitToWidth();
+                this.api.asc_GetDefaultTableStyles && setTimeout(() => {this.api.asc_GetDefaultTableStyles()}, 1);
+
+                this.applyLicense();
+
+                Common.Notifications.trigger('document:ready');
+                Common.Gateway.documentReady();
             };
 
             const _process_array = (array, fn) => {
@@ -205,16 +269,42 @@ class MainController extends Component {
                         'translate': t('Main.SDK', {returnObjects:true})
                     });
 
+                    Common.Notifications.trigger('engineCreated', this.api);
+                    Common.EditorApi = {get: () => this.api};
+
+                    // Set font rendering mode
+                    let value = LocalStorage.getItem("de-settings-fontrender");
+                    if (value === null) {
+                        value = window.devicePixelRatio > 1 ? '1' : '0';
+                    }
+                    switch (value) {
+                        case '0': this.api.SetFontRenderingMode(3); break;
+                        case '1': this.api.SetFontRenderingMode(1); break;
+                        case '2': this.api.SetFontRenderingMode(2); break;
+                    }
+
+                    Common.Utils.Metric.setCurrentMetric(1); //pt
+
                     this.appOptions   = {};
                     this.bindEvents();
 
                     Common.Gateway.on('init',           loadConfig);
-                    // Common.Gateway.on('showmessage',    _.bind(me.onExternalMessage, me));
+                    Common.Gateway.on('showmessage',    this.onExternalMessage.bind(this));
                     Common.Gateway.on('opendocument',   loadDocument);
                     Common.Gateway.appReady();
 
-                    Common.Notifications.trigger('engineCreated', this.api);
-                    Common.EditorApi = {get: () => this.api};
+                    Common.Gateway.on('internalcommand', function(data) {
+                        if (data.command === 'hardBack') {
+                            if ($$('.modal-in').length > 0) {
+                                if ( !($$('.error-dialog.modal-in').length > 0) ) {
+                                    f7.dialog.close();
+                                }
+                                Common.Gateway.internalMessage('hardBack', false);
+                            } else
+                                Common.Gateway.internalMessage('hardBack', true);
+                        }
+                    });
+                    Common.Gateway.internalMessage('listenHardBack');
                 }, error => {
                     console.log('promise failed ' + error);
                 });
@@ -240,8 +330,8 @@ class MainController extends Component {
         Common.Utils.Metric.setCurrentMetric(value);
         this.api.asc_SetDocumentUnits((value === Common.Utils.Metric.c_MetricUnits.inch) ? Asc.c_oAscDocumentUnits.Inch : ((value===Common.Utils.Metric.c_MetricUnits.pt) ? Asc.c_oAscDocumentUnits.Point : Asc.c_oAscDocumentUnits.Millimeter));
 
-        //me.api.asc_registerCallback('asc_onDocumentModifiedChanged', _.bind(me.onDocumentModifiedChanged, me));
-        //me.api.asc_registerCallback('asc_onDocumentCanSaveChanged',  _.bind(me.onDocumentCanSaveChanged, me));
+        this.api.asc_registerCallback('asc_onDocumentModifiedChanged', this.onDocumentModifiedChanged.bind(this));
+        this.api.asc_registerCallback('asc_onDocumentCanSaveChanged',  this.onDocumentCanSaveChanged.bind(this));
 
         //if (me.stackLongActions.exist({id: ApplyEditRights, type: Asc.c_oAscAsyncActionType['BlockInteraction']})) {
         //    me.onLongActionEnd(Asc.c_oAscAsyncActionType['BlockInteraction'], ApplyEditRights);
@@ -253,6 +343,19 @@ class MainController extends Component {
         // Message on window close
         window.onbeforeunload = this.onBeforeUnload.bind(this);
         window.onunload = this.onUnload.bind(this);
+    }
+
+    onDocumentModifiedChanged () {
+        const isModified = this.api.asc_isDocumentCanSave();
+        if (this._state.isDocModified !== isModified) {
+            this._isDocReady && Common.Gateway.setDocumentModified(this.api.isDocumentModified());
+        }
+
+        this.updateWindowTitle();
+    }
+
+    onDocumentCanSaveChanged (isCanSave) {
+        //
     }
 
     onBeforeUnload () {
@@ -286,6 +389,12 @@ class MainController extends Component {
 
     applyLicense () {
         const _t = this._t;
+        const warnNoLicense  = _t.warnNoLicense.replace(/%1/g, __COMPANY_NAME__);
+        const warnNoLicenseUsers = _t.warnNoLicenseUsers.replace(/%1/g, __COMPANY_NAME__);
+        const textNoLicenseTitle = _t.textNoLicenseTitle.replace(/%1/g, __COMPANY_NAME__);
+        const warnLicenseExceeded = _t.warnLicenseExceeded.replace(/%1/g, __COMPANY_NAME__);
+        const warnLicenseUsersExceeded = _t.warnLicenseUsersExceeded.replace(/%1/g, __COMPANY_NAME__);
+
         const appOptions = this.props.storeAppOptions;
         if (appOptions.config.mode !== 'view' && !EditorUIController.isSupportEditFeature()) {
             let value = LocalStorage.getItem("de-opensource-warning");
@@ -313,9 +422,9 @@ class MainController extends Component {
             ) {
                 license = (license === Asc.c_oLicenseResult.ExpiredLimited) ? _t.warnLicenseLimitedNoAccess : _t.warnLicenseLimitedRenewed;
             } else if (license === Asc.c_oLicenseResult.Connections || license === Asc.c_oLicenseResult.UsersCount) {
-                license = (license===Asc.c_oLicenseResult.Connections) ? _t.warnLicenseExceeded : _t.warnLicenseUsersExceeded;
+                license = (license===Asc.c_oLicenseResult.Connections) ? warnLicenseExceeded : warnLicenseUsersExceeded;
             } else {
-                license = (license === Asc.c_oLicenseResult.ConnectionsOS) ? _t.warnNoLicense : _t.warnNoLicenseUsers;
+                license = (license === Asc.c_oLicenseResult.ConnectionsOS) ? warnNoLicense : warnNoLicenseUsers;
                 buttons = [{
                     text: _t.textBuyNow,
                     bold: true,
@@ -345,7 +454,7 @@ class MainController extends Component {
             if (now - value > 86400000) {
                 LocalStorage.setItem("de-license-warning", now);
                 f7.dialog.create({
-                    title: _t.textNoLicenseTitle,
+                    title: textNoLicenseTitle,
                     text : license,
                     buttons: buttons
                 }).open();
@@ -374,7 +483,7 @@ class MainController extends Component {
         if (this.changeServerVersion) return true;
         const _t = this._t;
 
-        if (About.appVersion() !== buildVersion && !window.compareVersions) {
+        if (About.appVersion() !== buildVersion && !About.compareVersions()) {
             this.changeServerVersion = true;
             f7.dialog.alert(
                 _t.errorServerVersion,
@@ -388,9 +497,15 @@ class MainController extends Component {
     }
 
     bindEvents() {
-        this.api.asc_registerCallback('asc_onSendThemeColors', (colors, standart_colors) => {
-            Common.Utils.ThemeColor.setColors(colors, standart_colors);
-        });
+        this.api.asc_registerCallback('asc_onDocumentUpdateVersion', this.onUpdateVersion.bind(this));
+        this.api.asc_registerCallback('asc_onServerVersion', this.onServerVersion.bind(this));
+        this.api.asc_registerCallback('asc_onDocumentName', this.onDocumentName.bind(this));
+        this.api.asc_registerCallback('asc_onPrintUrl', this.onPrintUrl.bind(this));
+        this.api.asc_registerCallback('asc_onPrint', this.onPrint.bind(this));
+
+        EditorUIController.initThemeColors && EditorUIController.initThemeColors();
+
+        this.api.asc_registerCallback('asc_onDownloadUrl', this.onDownloadUrl.bind(this));
 
         const storeDocumentSettings = this.props.storeDocumentSettings;
         this.api.asc_registerCallback('asc_onPageOrient', isPortrait => {
@@ -399,34 +514,12 @@ class MainController extends Component {
         this.api.asc_registerCallback('asc_onDocSize', (w, h) => {
             storeDocumentSettings.changeDocSize(w, h);
         });
-        const storeFocusObjects = this.props.storeFocusObjects;
-        this.api.asc_registerCallback('asc_onFocusObject', objects => {
-            storeFocusObjects.resetFocusObjects(objects);
-        });
 
         //text settings
         const storeTextSettings = this.props.storeTextSettings;
-        this.api.asc_registerCallback('asc_onInitEditorFonts', (fonts, select) => {
-            storeTextSettings.initEditorFonts(fonts, select);
-        });
-        this.api.asc_registerCallback('asc_onFontFamily', (font) => {
-            storeTextSettings.resetFontName(font);
-        });
-        this.api.asc_registerCallback('asc_onFontSize', (size) => {
-            storeTextSettings.resetFontSize(size);
-        });
-        this.api.asc_registerCallback('asc_onBold', (isBold) => {
-            storeTextSettings.resetIsBold(isBold);
-        });
-        this.api.asc_registerCallback('asc_onItalic', (isItalic) => {
-            storeTextSettings.resetIsItalic(isItalic);
-        });
-        this.api.asc_registerCallback('asc_onUnderline', (isUnderline) => {
-            storeTextSettings.resetIsUnderline(isUnderline);
-        });
-        this.api.asc_registerCallback('asc_onStrikeout', (isStrikeout) => {
-            storeTextSettings.resetIsStrikeout(isStrikeout);
-        });
+        EditorUIController.initFonts && EditorUIController.initFonts(storeTextSettings);
+        EditorUIController.initFocusObjects && EditorUIController.initFocusObjects(this.props.storeFocusObjects);
+
         this.api.asc_registerCallback('asc_onVerticalAlign', (typeBaseline) => {
             storeTextSettings.resetTypeBaseline(typeBaseline);
         });
@@ -437,10 +530,15 @@ class MainController extends Component {
             switch (type) {
                 case 0:
                     storeTextSettings.resetBullets(subtype);
+                    storeTextSettings.resetNumbers(-1);
                     break;
                 case 1:
                     storeTextSettings.resetNumbers(subtype);
+                    storeTextSettings.resetBullets(-1);
                     break;
+                default: 
+                    storeTextSettings.resetBullets(-1);
+                    storeTextSettings.resetNumbers(-1);
             }
         });
         this.api.asc_registerCallback('asc_onPrAlign', (align) => {
@@ -458,28 +556,13 @@ class MainController extends Component {
         });
 
         //paragraph settings
-        this.api.asc_setParagraphStylesSizes(330, 38);
-        const storeParagraphSettings = this.props.storeParagraphSettings;
-        this.api.asc_registerCallback('asc_onInitEditorStyles', (styles) => {
-            storeParagraphSettings.initEditorStyles(styles);
-        });
-        this.api.asc_registerCallback('asc_onParaStyleName', (name) => {
-            storeParagraphSettings.changeParaStyleName(name);
-        });
+        EditorUIController.initEditorStyles && EditorUIController.initEditorStyles(this.props.storeParagraphSettings);
 
         //table settings
-        const storeTableSettings = this.props.storeTableSettings;
-        this.api.asc_registerCallback('asc_onInitTableTemplates', (templates) => {
-            storeTableSettings.initTableTemplates(templates);
-        });
+        EditorUIController.initTableTemplates && EditorUIController.initTableTemplates(this.props.storeTableSettings);
 
         //chart settings
-        const storeChartSettings = this.props.storeChartSettings;
-        this.api.asc_registerCallback('asc_onUpdateChartStyles', () => {
-            if (storeFocusObjects.chartObject && storeFocusObjects.chartObject.get_ChartProperties()) {
-                storeChartSettings.updateChartStyles(this.api.asc_getChartPreviews(storeFocusObjects.chartObject.get_ChartProperties().getType()));
-            }
-        });
+        EditorUIController.updateChartStyles && EditorUIController.updateChartStyles(this.props.storeChartSettings, this.props.storeFocusObjects);
 
         // Document Info
 
@@ -501,10 +584,6 @@ class MainController extends Component {
           storeDocumentInfo.switchIsLoaded(true);
         });
 
-        this.api.asc_registerCallback('asc_onDocumentName', (name) => {
-            // console.log(name);
-        });
-
         // Color Schemes
 
         this.api.asc_registerCallback('asc_onSendThemeColorSchemes', (arr) => {
@@ -519,14 +598,206 @@ class MainController extends Component {
         });
     }
 
+    onProcessSaveResult (data) {
+        this.api.asc_OnSaveEnd(data.result);
+
+        if (data && data.result === false) {
+            const _t = this._t;
+            f7.dialog.alert(
+                (!data.message) ? _t.errorProcessSaveResult : data.message,
+                _t.criticalErrorTitle
+            );
+        }
+    }
+
+    onProcessRightsChange (data) {
+        if (data && data.enabled === false) {
+            const appOptions = this.props.storeAppOptions;
+            const old_rights = appOptions.lostEditingRights;
+            appOptions.changeEditingRights(!old_rights);
+            this.api.asc_coAuthoringDisconnect();
+            Common.Notifications.trigger('api:disconnect');
+
+            if (!old_rights) {
+                const _t = this._t;
+                f7.dialog.alert(
+                    (!data.message) ? _t.warnProcessRightsChange : data.message,
+                    _t.notcriticalErrorTitle,
+                    () => { appOptions.changeEditingRights(false); }
+                );
+            }
+        }
+    }
+
+    onDownloadAs () {
+        const appOptions = this.props.storeAppOptions;
+        if ( !appOptions.canDownload && !appOptions.canDownloadOrigin) {
+            Common.Gateway.reportError(Asc.c_oAscError.ID.AccessDeny, this._t.errorAccessDeny);
+            return;
+        }
+
+        this._state.isFromGatewayDownloadAs = true;
+        const type = /^(?:(pdf|djvu|xps))$/.exec(this.document.fileType);
+
+        if (type && typeof type[1] === 'string') {
+            this.api.asc_DownloadOrigin(true);
+        } else {
+            this.api.asc_DownloadAs(new Asc.asc_CDownloadOptions(Asc.c_oAscFileType.DOCX, true));
+        }
+    }
+
+    onDownloadUrl () {
+        if (this._state.isFromGatewayDownloadAs) {
+            Common.Gateway.downloadAs(url);
+        }
+
+        this._state.isFromGatewayDownloadAs = false;
+    }
+
+    onRequestClose () {
+        Common.Gateway.requestClose();
+    }
+
+    onUpdateVersion (callback) {
+        const _t = this._t;
+
+        this.needToUpdateVersion = true;
+        Common.Notifications.trigger('preloader:endAction', Asc.c_oAscAsyncActionType['BlockInteraction'], this.LoadingDocument);
+
+        f7.dialog.alert(
+            _t.errorUpdateVersion,
+            _t.titleUpdateVersion,
+            () => {
+                Common.Gateway.updateVersion();
+                if (callback) {
+                    callback.call(this);
+                }
+                Common.Notifications.trigger('preloader:beginAction', Asc.c_oAscAsyncActionType['BlockInteraction'], this.LoadingDocument);
+            });
+    }
+
+    onDocumentName () {
+        this.updateWindowTitle(true);
+    }
+
+    updateWindowTitle (force) {
+        const isModified = this.api.isDocumentModified();
+        if (this._state.isDocModified !== isModified || force) {
+            const title = this.defaultTitleText;
+
+            if (window.document.title != title) {
+                window.document.title = title;
+            }
+
+            this._isDocReady && (this._state.isDocModified !== isModified) && Common.Gateway.setDocumentModified(isModified);
+            this._state.isDocModified = isModified;
+        }
+    }
+
+    onPrint () {
+        if (!this.props.storeAppOptions.canPrint) return;
+
+        if (this.api)
+            this.api.asc_Print();
+        Common.component.Analytics.trackEvent('Print');
+    }
+
+    onPrintUrl (url) {
+        if (this.iframePrint) {
+            this.iframePrint.parentNode.removeChild(this.iframePrint);
+            this.iframePrint = null;
+        }
+
+        if (!this.iframePrint) {
+            this.iframePrint = document.createElement("iframe");
+            this.iframePrint.id = "id-print-frame";
+            this.iframePrint.style.display = 'none';
+            this.iframePrint.style.visibility = "hidden";
+            this.iframePrint.style.position = "fixed";
+            this.iframePrint.style.right = "0";
+            this.iframePrint.style.bottom = "0";
+            document.body.appendChild(this.iframePrint);
+            this.iframePrint.onload = function() {
+                this.iframePrint.contentWindow.focus();
+                this.iframePrint.contentWindow.print();
+                this.iframePrint.contentWindow.blur();
+                window.focus();
+            };
+        }
+
+        if (url) {
+            this.iframePrint.src = url;
+        }
+    }
+
+    onExternalMessage (msg) {
+        if (msg && msg.msg) {
+            msg.msg = (msg.msg).toString();
+            f7.notification.create({
+                //title: uiApp.params.modalTitle,
+                text: [msg.msg.charAt(0).toUpperCase() + msg.msg.substring(1)],
+                closeButton: true
+            }).open();
+
+            Common.component.Analytics.trackEvent('External Error');
+        }
+    }
+
+    onRunAutostartMacroses () {
+        const config = this.props.storeAppOptions.config;
+        const enable = !config.customization || (config.customization.macros !== false);
+        if (enable) {
+            const value = this.props.storeApplicationSettings.macrosMode;
+            if (value === 1) {
+                this.api.asc_runAutostartMacroses();
+            } else if (value === 0) {
+                const _t = this._t;
+                f7.dialog.create({
+                    title: _t.notcriticalErrorTitle,
+                    text: _t.textHasMacros,
+                    content: `<div class="checkbox-in-modal">
+                      <label class="checkbox">
+                        <input type="checkbox" name="checkbox-show-macros" />
+                        <i class="icon-checkbox"></i>
+                      </label>
+                      <span class="right-text">${_t.textRemember}</span>
+                      </div>`,
+                    buttons: [{
+                        text: _t.textYes,
+                        onClick: () => {
+                            const dontshow = $$('input[name="checkbox-show-macros"]').prop('checked');
+                            if (dontshow) {
+                                this.props.storeApplicationSettings.changeMacrosSettings(1);
+                                LocalStorage.setItem("de-mobile-macros-mode", 1);
+                            }
+                            setTimeout(() => {
+                                this.api.asc_runAutostartMacroses();
+                            }, 1);
+                        }},
+                        {
+                            text: _t.textNo,
+                            onClick: () => {
+                                const dontshow = $$('input[name="checkbox-show-macros"]').prop('checked');
+                                if (dontshow) {
+                                    this.props.storeApplicationSettings.changeMacrosSettings(2);
+                                    LocalStorage.setItem("de-mobile-macros-mode", 2);
+                                }
+                            }
+                        }]
+                }).open();
+            }
+        }
+    }
+
     render() {
         return (
             <Fragment>
+                <LongActionsController />
+                <ErrorController LoadingDocument={this.LoadingDocument}/>
                 <CollaborationController />
                 <ReviewController />
                 <CommentsController />
-                <AddCommentController />
-                <EditCommentController />
+                {EditorUIController.getEditCommentControllers && EditorUIController.getEditCommentControllers()}
                 <ViewCommentsController />
             </Fragment>
             )

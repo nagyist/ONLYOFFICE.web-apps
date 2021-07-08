@@ -89,9 +89,9 @@ define([
             this.isChart = false;
 
             this._arrLineRule = [
-                {displayValue: this.textAtLeast,defaultValue: 5, value: c_paragraphLinerule.LINERULE_LEAST, minValue: 0.03,   step: 0.01, defaultUnit: 'cm'},
-                {displayValue: this.textAuto,   defaultValue: 1, value: c_paragraphLinerule.LINERULE_AUTO, minValue: 0.5,    step: 0.01, defaultUnit: ''},
-                {displayValue: this.textExact,  defaultValue: 5, value: c_paragraphLinerule.LINERULE_EXACT, minValue: 0.03,   step: 0.01, defaultUnit: 'cm'}
+                {displayValue: this.textAtLeast,defaultValue: 4.24, value: c_paragraphLinerule.LINERULE_LEAST, minValue: 0.03,   step: 0.01, defaultUnit: 'pt'},
+                {displayValue: this.textAuto,   defaultValue: 1.08, value: c_paragraphLinerule.LINERULE_AUTO, minValue: 0.5,    step: 0.01, defaultUnit: ''},
+                {displayValue: this.textExact,  defaultValue: 4.24, value: c_paragraphLinerule.LINERULE_EXACT, minValue: 0.03,   step: 0.01, defaultUnit: 'pt'}
             ];
 
             this._arrSpecial = [
@@ -273,9 +273,10 @@ define([
         onNumLineHeightChange: function(field, newValue, oldValue, eOpts){
             if ( this.cmbLineRule.getRawValue() === '' )
                 return;
-            var type = c_paragraphLinerule.LINERULE_AUTO;
+            var type = c_paragraphLinerule.LINERULE_AUTO; 
             if (this.api)
-                this.api.put_PrLineSpacing(this.cmbLineRule.getValue(), (this.cmbLineRule.getValue()==c_paragraphLinerule.LINERULE_AUTO) ? field.getNumberValue() : Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()));
+                this.api.put_PrLineSpacing(this.cmbLineRule.getValue(), (this.cmbLineRule.getValue()==c_paragraphLinerule.LINERULE_AUTO) ? field.getNumberValue() : field.getNumberValue()* 25.4 / 72.0);
+            //    this.api.put_PrLineSpacing(this.cmbLineRule.getValue(), (this.cmbLineRule.getValue()==c_paragraphLinerule.LINERULE_AUTO) ? field.getNumberValue() : Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()));
         },
 
         onNumSpacingBeforeChange: function(field, newValue, oldValue, eOpts){
@@ -328,7 +329,8 @@ define([
                 if ( linerule == c_paragraphLinerule.LINERULE_AUTO ) {
                     val = line;
                 } else if (linerule !== null && line !== null ) {
-                    val = Common.Utils.Metric.fnRecalcFromMM(line);
+                    //val = Common.Utils.Metric.fnRecalcFromMM(line);
+                    val=parseFloat((line * 72.0 / 25.4).toFixed(3));
                 }
                 this.numLineHeight.setValue((val !== null) ? val : '', true);
 
@@ -558,9 +560,12 @@ define([
                         spinner.setStep(Common.Utils.Metric.getCurrentMetric()==Common.Utils.Metric.c_MetricUnits.pt ? 1 : 0.1);
                 }
             }
-            this._arrLineRule[2].defaultUnit =  this._arrLineRule[0].defaultUnit = Common.Utils.Metric.getCurrentMetricName();
-            this._arrLineRule[2].minValue =  this._arrLineRule[0].minValue = parseFloat(Common.Utils.Metric.fnRecalcFromMM(0.3).toFixed(2));
-            this._arrLineRule[2].step =  this._arrLineRule[0].step = (Common.Utils.Metric.getCurrentMetric()==Common.Utils.Metric.c_MetricUnits.pt) ? 1 : 0.01;
+            //this._arrLineRule[2].defaultUnit =  this._arrLineRule[0].defaultUnit = Common.Utils.Metric.getCurrentMetricName();
+            //this._arrLineRule[2].minValue =  this._arrLineRule[0].minValue = parseFloat(parseFloat((0.3 * 72.0 / 25.4).toFixed(3)).toFixed(2));
+            //this._arrLineRule[2].minValue =  this._arrLineRule[0].minValue = parseFloat(Common.Utils.Metric.fnRecalcFromMM(0.3).toFixed(2));
+            //this._arrLineRule[2].step =  this._arrLineRule[0].step = (Common.Utils.Metric.getCurrentMetric()==Common.Utils.Metric.c_MetricUnits.pt) ? 1 : 0.01;
+            //this._arrLineRule[2].step =  this._arrLineRule[0].step = 1;
+
             if (this._state.LineRuleIdx !== null) {
                 this.numLineHeight.setDefaultUnit(this._arrLineRule[this._state.LineRuleIdx].defaultUnit);
                 this.numLineHeight.setStep(this._arrLineRule[this._state.LineRuleIdx].step);
@@ -568,7 +573,9 @@ define([
                 if ( this._state.LineRuleIdx == c_paragraphLinerule.LINERULE_AUTO ) {
                     val = this._state.LineHeight;
                 } else if (this._state.LineHeight !== null ) {
-                    val = Common.Utils.Metric.fnRecalcFromMM(this._state.LineHeight);
+
+                    val = parseFloat((this._state.LineHeight* 72.0 / 25.4).toFixed(3));
+                    //val = Common.Utils.Metric.fnRecalcFromMM(this._state.LineHeight);
                 }
                 this.numLineHeight && this.numLineHeight.setValue((val !== null) ?  val : '', true);
             }

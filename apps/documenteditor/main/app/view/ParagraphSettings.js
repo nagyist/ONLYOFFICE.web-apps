@@ -488,6 +488,7 @@ define([
                     (this._state.LeftIndent===null || left===null)&&(this._state.LeftIndent!==left)) {
                     this.numIndentsLeft.setValue(left!==null ? Common.Utils.Metric.fnRecalcFromMM(left) : '', true);
                     this._state.LeftIndent=left;
+                    
                 }
 
                 if ( Math.abs(this._state.FirstLine-first)>0.001 ||
@@ -554,12 +555,14 @@ define([
                 for (var i=0; i<this.spinners.length; i++) {
                     var spinner = this.spinners[i];
                     spinner.setDefaultUnit(Common.Utils.Metric.getCurrentMetricName());
-                    if(spinner.el.id == 'paragraph-spin-spacing-before' || spinner.el.id == 'paragraph-spin-spacing-after')
-                        spinner.setDefaultUnit( Common.Utils.Metric.getMetricName(Common.Utils.Metric.c_MetricUnits.pt));
+                    
                     if (spinner.el.id == 'paragraphadv-spin-position' )
                         spinner.setStep(Common.Utils.Metric.getCurrentMetric()==Common.Utils.Metric.c_MetricUnits.pt ? 1 : 0.01);
-                    else if( spinner.el.id == 'paragraph-spin-spacing-before' || spinner.el.id == 'paragraph-spin-spacing-after')
+                    else if( spinner.el.id == 'paragraph-spin-spacing-before' || spinner.el.id == 'paragraph-spin-spacing-after'){
+
                         spinner.setStep(1);
+                        spinner.setDefaultUnit( Common.Utils.Metric.getMetricName(Common.Utils.Metric.c_MetricUnits.pt));                            
+                    }
                     else
                         spinner.setStep(Common.Utils.Metric.getCurrentMetric()==Common.Utils.Metric.c_MetricUnits.pt ? 1 : 0.1);
                 }

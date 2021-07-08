@@ -381,8 +381,8 @@ var metrics = new(function() {
 
         fnRecalcToMM: function(value, unit) {
             // value in pt/cm/inch. need to convert to mm
-            if(unit==undefined)
-                unrt=me.currentMetric
+            if(unit===undefined)
+                unit=me.currentMetric;
             if (value!==null && value!==undefined) {
                 switch (unit) {
                     case me.c_MetricUnits.cm:
@@ -398,8 +398,8 @@ var metrics = new(function() {
 
         fnRecalcFromMM: function(value, unit) {
             // value in mm. need to convert to pt/cm/inch
-            if(unit==undefined)
-                unrt=me.currentMetric
+            if(unit===undefined)
+                 unit=me.currentMetric;
             switch (unit) {
                 case me.c_MetricUnits.cm:
                     return parseFloat((value/10.).toFixed(4));

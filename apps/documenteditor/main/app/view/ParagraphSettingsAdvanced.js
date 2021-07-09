@@ -99,9 +99,9 @@ define([    'text!documenteditor/main/app/template/ParagraphSettingsAdvanced.tem
             this.CurLineRuleIdx = this._originalProps.get_Spacing().get_LineRule();
 
             this._arrLineRule = [
-                {displayValue: this.textAtLeast,defaultValue: 4.24, value: c_paragraphLinerule.LINERULE_LEAST, minValue: 0.03,   step: 0.01, defaultUnit: 'pt'},
+                {displayValue: this.textAtLeast,defaultValue: 4.24, value: c_paragraphLinerule.LINERULE_LEAST, minValue: 0.03,   step: 1, defaultUnit: 'pt'},
                 {displayValue: this.textAuto,   defaultValue: 1, value: c_paragraphLinerule.LINERULE_AUTO, minValue: 0.5,    step: 0.01, defaultUnit: ''},
-                {displayValue: this.textExact,  defaultValue: 4.24, value: c_paragraphLinerule.LINERULE_EXACT, minValue: 0.03,   step: 0.01, defaultUnit: 'pt'}
+                {displayValue: this.textExact,  defaultValue: 4.24, value: c_paragraphLinerule.LINERULE_EXACT, minValue: 0.03,   step: 1, defaultUnit: 'pt'}
             ];
 
             this._arrSpecial = [
@@ -208,7 +208,7 @@ define([    'text!documenteditor/main/app/template/ParagraphSettingsAdvanced.tem
                     this.Spacing = properties.get_Spacing();
                 }
                 var value = field.getNumberValue();
-                this.Spacing.put_Before(value<0 ? -1 : Common.Utils.Metric.fnRecalcToMM(value));
+                this.Spacing.put_Before(value<0 ? -1 : Common.Utils.Metric.fnRecalcToMM(value, Common.Utils.Metric.c_MetricUnits.pt));
             }, this));
             this.spinners.push(this.numSpacingBefore);
 
@@ -229,7 +229,7 @@ define([    'text!documenteditor/main/app/template/ParagraphSettingsAdvanced.tem
                     this.Spacing = properties.get_Spacing();
                 }
                 var value = field.getNumberValue();
-                this.Spacing.put_After(value<0 ? -1 : Common.Utils.Metric.fnRecalcToMM(value));
+                this.Spacing.put_After(value<0 ? -1 : Common.Utils.Metric.fnRecalcToMM(value, Common.Utils.Metric.c_MetricUnits.pt));
             }, this));
             this.spinners.push(this.numSpacingAfter);
 
@@ -250,7 +250,7 @@ define([    'text!documenteditor/main/app/template/ParagraphSettingsAdvanced.tem
                 step: .01,
                 width: 85,
                 value: '',
-                defaultUnit : "",
+                defaultUnit : "pt",
                 maxValue: 132,
                 minValue: 0.5
             });
@@ -810,15 +810,15 @@ define([    'text!documenteditor/main/app/template/ParagraphSettingsAdvanced.tem
                 this.numIndentsRight.setValue((props.get_Ind() !== null && props.get_Ind().get_Right() !== null) ? Common.Utils.Metric.fnRecalcFromMM(props.get_Ind().get_Right()) : '', true);
 
                 var value = props.get_Spacing() ? props.get_Spacing().get_Before() : null;
-                this.numSpacingBefore.setValue((value !== null) ? (value<0 ? value : Common.Utils.Metric.fnRecalcFromMM(value)) : '', true);
+                this.numSpacingBefore.setValue((value !== null) ? (value<0 ? value : Common.Utils.Metric.fnRecalcFromMM(value, Common.Utils.Metric.c_MetricUnits.pt)) : '', true);
                 value = props.get_Spacing() ? props.get_Spacing().get_After() : null;
-                this.numSpacingAfter.setValue((value !== null) ? (value<0 ? value : Common.Utils.Metric.fnRecalcFromMM(value)) : '', true);
+                this.numSpacingAfter.setValue((value !== null) ? (value<0 ? value : Common.Utils.Metric.fnRecalcFromMM(value, Common.Utils.Metric.c_MetricUnits.pt)) : '', true);
 
                 var linerule = props.get_Spacing().get_LineRule();
                 this.cmbLineRule.setValue((linerule !== null) ? linerule : '', true);
 
                 if(props.get_Spacing() !== null && props.get_Spacing().get_Line() !== null) {
-                    this.numLineHeight.setValue((linerule==c_paragraphLinerule.LINERULE_AUTO) ? props.get_Spacing().get_Line() : Common.Utils.Metric.fnRecalcFromMM(props.get_Spacing().get_Line()), true);
+                    this.numLineHeight.setValue((linerule==c_paragraphLinerule.LINERULE_AUTO) ? props.get_Spacing().get_Line() : Common.Utils.Metric.fnRecalcFromMM(props.get_Spacing().get_Line(), Common.Utils.Metric.c_MetricUnits.pt), true);
                 } else {
                     this.numLineHeight.setValue('', true);
                 }
@@ -944,15 +944,20 @@ define([    'text!documenteditor/main/app/template/ParagraphSettingsAdvanced.tem
                 for (var i=0; i<this.spinners.length; i++) {
                     var spinner = this.spinners[i];
                     spinner.setDefaultUnit(Common.Utils.Metric.getCurrentMetricName());
-                    if (spinner.el.id == 'paragraphadv-spin-spacing' || spinner.el.id == 'paragraphadv-spin-position' || spinner.el.id == 'paragraphadv-spin-spacing-before' || spinner.el.id == 'paragraphadv-spin-spacing-after')
+                    if (spinner.el.id == 'paragraphadv-spin-spacing' || spinner.el.id == 'paragraphadv-spin-position')
                         spinner.setStep(Common.Utils.Metric.getCurrentMetric()==Common.Utils.Metric.c_MetricUnits.pt ? 1 : 0.01);
+                    else if( spinner.el.id == 'paragraphadv-spin-spacing-before' || spinner.el.id == 'paragraphadv-spin-spacing-after'){
+
+                        spinner.setStep(1);
+                        spinner.setDefaultUnit( Common.Utils.Metric.getMetricName(Common.Utils.Metric.c_MetricUnits.pt));                            
+                    }
                     else
                         spinner.setStep(Common.Utils.Metric.getCurrentMetric()==Common.Utils.Metric.c_MetricUnits.pt ? 1 : 0.1);
                 }
             }
             //this._arrLineRule[2].defaultUnit =  this._arrLineRule[0].defaultUnit = Common.Utils.Metric.getCurrentMetricName();
             //this._arrLineRule[2].minValue =  this._arrLineRule[0].minValue = parseFloat(Common.Utils.Metric.fnRecalcFromMM(0.3).toFixed(2));
-            this._arrLineRule[2].step =  this._arrLineRule[0].step = (Common.Utils.Metric.getCurrentMetric()==Common.Utils.Metric.c_MetricUnits.pt) ? 1 : 0.01;
+            //this._arrLineRule[2].step =  this._arrLineRule[0].step = (Common.Utils.Metric.getCurrentMetric()==Common.Utils.Metric.c_MetricUnits.pt) ? 1 : 0.01;
             if (this.CurLineRuleIdx !== null) {
                 this.numLineHeight.setDefaultUnit(this._arrLineRule[this.CurLineRuleIdx].defaultUnit);
                 this.numLineHeight.setStep(this._arrLineRule[this.CurLineRuleIdx].step);
@@ -1414,7 +1419,7 @@ define([    'text!documenteditor/main/app/template/ParagraphSettingsAdvanced.tem
                 if (this.Spacing.get_LineRule() === c_paragraphLinerule.LINERULE_AUTO) {
                     this.numLineHeight.setValue(this._arrLineRule[record.value].defaultValue);
                 } else if (this.CurLineRuleIdx === c_paragraphLinerule.LINERULE_AUTO) {
-                    this.numLineHeight.setValue(Common.Utils.Metric.fnRecalcFromMM(this._arrLineRule[record.value].defaultValue));
+                    this.numLineHeight.setValue(Common.Utils.Metric.fnRecalcFromMM(this._arrLineRule[record.value].defaultValue, Common.Utils.Metric.c_MetricUnits.pt));
                 } else {
                     this.numLineHeight.setValue(value);
                 }
@@ -1429,9 +1434,7 @@ define([    'text!documenteditor/main/app/template/ParagraphSettingsAdvanced.tem
                 var properties = (this._originalProps) ? this._originalProps : new Asc.asc_CParagraphProperty();
                 this.Spacing = properties.get_Spacing();
             }
-            this.Spacing.put_Line((this.cmbLineRule.getValue()==c_paragraphLinerule.LINERULE_AUTO) ? field.getNumberValue() : (field.getNumberValue()* 25.4 / 72.0));
-
-            //this.Spacing.put_Line((this.cmbLineRule.getValue()==c_paragraphLinerule.LINERULE_AUTO) ? field.getNumberValue() : Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()));
+            this.Spacing.put_Line((this.cmbLineRule.getValue()==c_paragraphLinerule.LINERULE_AUTO) ? field.getNumberValue() : Common.Utils.Metric.fnRecalcToMM(field.getNumberValue(), Common.Utils.Metric.c_MetricUnits.pt));
         },
 
         onSpecialSelect: function(combo, record) {

@@ -106,7 +106,7 @@ define([
             if ( this.cmbLineRule.getRawValue() === '' )
                 return;
             if (this.api)
-                this.api.asc_putPrLineSpacing(this.cmbLineRule.getValue(), (this.cmbLineRule.getValue()==c_paragraphLinerule.LINERULE_AUTO) ? field.getNumberValue() : Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()));
+                this.api.asc_putPrLineSpacing(this.cmbLineRule.getValue(), (this.cmbLineRule.getValue()==c_paragraphLinerule.LINERULE_AUTO) ? field.getNumberValue() : Common.Utils.Metric.fnRecalcToMM(field.getNumberValue(),Common.Utils.Metric.c_MetricUnits.pt));
         },
 
         onNumSpacingBeforeChange: function(field, newValue, oldValue, eOpts){
@@ -115,7 +115,7 @@ define([
                 if (num<0)
                     this.api.asc_putLineSpacingBeforeAfter(0, -1);
                 else
-                    this.api.asc_putLineSpacingBeforeAfter(0, Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()));
+                    this.api.asc_putLineSpacingBeforeAfter(0, Common.Utils.Metric.fnRecalcToMM(field.getNumberValue(), Common.Utils.Metric.c_MetricUnits.pt));
             }
         },
 
@@ -125,7 +125,7 @@ define([
                 if (num<0)
                     this.api.asc_putLineSpacingBeforeAfter(1, -1);
                 else
-                    this.api.asc_putLineSpacingBeforeAfter(1, Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()));
+                    this.api.asc_putLineSpacingBeforeAfter(1, Common.Utils.Metric.fnRecalcToMM(field.getNumberValue(), Common.Utils.Metric.c_MetricUnits.pt));
             }
         },
 
@@ -162,7 +162,7 @@ define([
                 if ( linerule == c_paragraphLinerule.LINERULE_AUTO ) {
                     val = line;
                 } else if (linerule !== null && line !== null ) {
-                    val = Common.Utils.Metric.fnRecalcFromMM(line);
+                    val = Common.Utils.Metric.fnRecalcFromMM(line, Common.Utils.Metric.c_MetricUnits.pt);
                 }
                 this.numLineHeight.setValue((val !== null) ? val : '', true);
 
@@ -202,7 +202,7 @@ define([
                     if ( Spacing.LineRule == c_paragraphLinerule.LINERULE_AUTO ) {
                         val = Spacing.Line;
                     } else if (Spacing.LineRule !== null && Spacing.Line !== null ) {
-                        val = Common.Utils.Metric.fnRecalcFromMM(Spacing.Line);
+                        val = Common.Utils.Metric.fnRecalcFromMM(Spacing.Line, Common.Utils.Metric.c_MetricUnits.pt);
                     }
                     this.numLineHeight.setValue((val !== null) ?  val : '', true);
 
@@ -212,14 +212,14 @@ define([
                 if ( Math.abs(this._state.LineSpacingBefore-Spacing.Before)>0.001 ||
                     (this._state.LineSpacingBefore===null || Spacing.Before===null)&&(this._state.LineSpacingBefore!==Spacing.Before)) {
 
-                    this.numSpacingBefore.setValue((Spacing.Before !== null) ? ((Spacing.Before<0) ? Spacing.Before : Common.Utils.Metric.fnRecalcFromMM(Spacing.Before) ) : '', true);
+                    this.numSpacingBefore.setValue((Spacing.Before !== null) ? ((Spacing.Before<0) ? Spacing.Before : Common.Utils.Metric.fnRecalcFromMM(Spacing.Before, Common.Utils.Metric.c_MetricUnits.pt) ) : '', true);
                     this._state.LineSpacingBefore=Spacing.Before;
                 }
 
                 if ( Math.abs(this._state.LineSpacingAfter-Spacing.After)>0.001 ||
                     (this._state.LineSpacingAfter===null || Spacing.After===null)&&(this._state.LineSpacingAfter!==Spacing.After)) {
 
-                    this.numSpacingAfter.setValue((Spacing.After !== null) ? ((Spacing.After<0) ? Spacing.After : Common.Utils.Metric.fnRecalcFromMM(Spacing.After) ) : '', true);
+                    this.numSpacingAfter.setValue((Spacing.After !== null) ? ((Spacing.After<0) ? Spacing.After : Common.Utils.Metric.fnRecalcFromMM(Spacing.After, Common.Utils.Metric.c_MetricUnits.pt) ) : '', true);
                     this._state.LineSpacingAfter=Spacing.After;
                 }
             }
@@ -229,19 +229,19 @@ define([
             if (this.spinners) {
                 for (var i=0; i<this.spinners.length; i++) {
                     var spinner = this.spinners[i];
-                    spinner.setDefaultUnit(Common.Utils.Metric.getCurrentMetricName());
-                    spinner.setStep(Common.Utils.Metric.getCurrentMetric()==Common.Utils.Metric.c_MetricUnits.pt ? 1 : 0.01);
+                    /*spinner.setDefaultUnit(Common.Utils.Metric.getCurrentMetricName());
+                    spinner.setStep(Common.Utils.Metric.getCurrentMetric()==Common.Utils.Metric.c_MetricUnits.pt ? 1 : 0.01);*/
                 }
                 var val = this._state.LineSpacingBefore;
-                this.numSpacingBefore && this.numSpacingBefore.setValue((val !== null) ? ((val<0) ? val : Common.Utils.Metric.fnRecalcFromMM(val) ) : '', true);
+                this.numSpacingBefore && this.numSpacingBefore.setValue((val !== null) ? ((val<0) ? val : Common.Utils.Metric.fnRecalcFromMM(val, Common.Utils.Metric.c_MetricUnits.pt) ) : '', true);
                 val = this._state.LineSpacingAfter;
-                this.numSpacingAfter && this.numSpacingAfter.setValue((val !== null) ? ((val<0) ? val : Common.Utils.Metric.fnRecalcFromMM(val) ) : '', true);
+                this.numSpacingAfter && this.numSpacingAfter.setValue((val !== null) ? ((val<0) ? val : Common.Utils.Metric.fnRecalcFromMM(val, Common.Utils.Metric.c_MetricUnits.pt) ) : '', true);
             }
             if (this.cmbLineRule) {
                 var rec = this.cmbLineRule.store.at(1);
-                rec.set({defaultUnit: Common.Utils.Metric.getCurrentMetricName(),
+                /*rec.set({defaultUnit: Common.Utils.Metric.getCurrentMetricName(),
                         minValue: parseFloat(Common.Utils.Metric.fnRecalcFromMM(0.3).toFixed(2)),
-                        step: (Common.Utils.Metric.getCurrentMetric()==Common.Utils.Metric.c_MetricUnits.pt) ? 1 : 0.01});
+                        step: (Common.Utils.Metric.getCurrentMetric()==Common.Utils.Metric.c_MetricUnits.pt) ? 1 : 0.01});*/
 
                 if (this._state.LineRule !== null) {
                     var obj;
@@ -253,7 +253,7 @@ define([
                     if ( this._state.LineRule == c_paragraphLinerule.LINERULE_AUTO ) {
                         val = this._state.LineHeight;
                     } else if (this._state.LineHeight !== null ) {
-                        val = Common.Utils.Metric.fnRecalcFromMM(this._state.LineHeight);
+                        val = Common.Utils.Metric.fnRecalcFromMM(this._state.LineHeight, Common.Utils.Metric.c_MetricUnits.pt);
                     }
                     this.numLineHeight && this.numLineHeight.setValue((val !== null) ?  val : '', true);
                 }
@@ -265,7 +265,7 @@ define([
 
             this._arrLineRule = [
                 {displayValue: this.textAuto,   defaultValue: 1, value: c_paragraphLinerule.LINERULE_AUTO, minValue: 0.5,    step: 0.01, defaultUnit: ''},
-                {displayValue: this.textExact,  defaultValue: 5, value: c_paragraphLinerule.LINERULE_EXACT, minValue: 0.03,   step: 0.01, defaultUnit: 'cm'}
+                {displayValue: this.textExact,  defaultValue: 4.66, value: c_paragraphLinerule.LINERULE_EXACT, minValue: 0.03,   step: 1, defaultUnit: 'pt'}
             ];
 
             // Short Size
@@ -292,11 +292,11 @@ define([
 
             this.numSpacingBefore = new Common.UI.MetricSpinner({
                 el: $('#paragraph-spin-spacing-before'),
-                step: .1,
+                step: 1,
                 width: 85,
-                value: '0 cm',
-                defaultUnit : "cm",
-                maxValue: 55.88,
+                value: '0 pt',
+                defaultUnit : "pt",
+                maxValue: 1584,
                 minValue: 0,
                 allowAuto   : true,
                 autoText    : this.txtAutoText
@@ -306,11 +306,11 @@ define([
 
             this.numSpacingAfter = new Common.UI.MetricSpinner({
                 el: $('#paragraph-spin-spacing-after'),
-                step: .1,
+                step: 1,
                 width: 85,
-                value: '0.35 cm',
-                defaultUnit : "cm",
-                maxValue: 55.88,
+                value: '0.35 pt',
+                defaultUnit : "pt",
+                maxValue: 1584,
                 minValue: 0,
                 allowAuto   : true,
                 autoText    : this.txtAutoText

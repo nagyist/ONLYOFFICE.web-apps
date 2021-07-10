@@ -83,7 +83,7 @@ define([    'text!spreadsheeteditor/main/app/template/ParagraphSettingsAdvanced.
 
             this._arrLineRule = [
                 {displayValue: this.textAuto,   defaultValue: 1, value: c_paragraphLinerule.LINERULE_AUTO, minValue: 0.5,    step: 0.01, defaultUnit: ''},
-                {displayValue: this.textExact,  defaultValue: 5, value: c_paragraphLinerule.LINERULE_EXACT, minValue: 0.03,   step: 0.01, defaultUnit: 'cm'}
+                {displayValue: this.textExact,  defaultValue: 4.66, value: c_paragraphLinerule.LINERULE_EXACT, minValue: 0.03,   step: 1, defaultUnit: 'pt'}
             ];
 
             var curLineRule = this._originalProps.asc_getSpacing().asc_getLineRule(),
@@ -198,11 +198,11 @@ define([    'text!spreadsheeteditor/main/app/template/ParagraphSettingsAdvanced.
 
             this.numSpacingBefore = new Common.UI.MetricSpinner({
                 el: $('#paragraphadv-spin-spacing-before'),
-                step: .1,
+                step: 1,
                 width: 85,
                 value: '',
-                defaultUnit : "cm",
-                maxValue: 55.88,
+                defaultUnit : "pt",
+                maxValue: 1584,
                 minValue: 0,
                 allowAuto   : true,
                 autoText    : this.txtAutoText
@@ -212,17 +212,17 @@ define([    'text!spreadsheeteditor/main/app/template/ParagraphSettingsAdvanced.
                     var properties = (this._originalProps) ? this._originalProps : new Asc.asc_CParagraphProperty();
                     this.Spacing = properties.asc_getSpacing();
                 }
-                this.Spacing.put_Before(Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()));
+                this.Spacing.put_Before(Common.Utils.Metric.fnRecalcToMM(field.getNumberValue(), Common.Utils.Metric.c_MetricUnits.pt));
             }, this));
             this.spinners.push(this.numSpacingBefore);
 
             this.numSpacingAfter = new Common.UI.MetricSpinner({
                 el: $('#paragraphadv-spin-spacing-after'),
-                step: .1,
+                step: 1,
                 width: 85,
                 value: '',
-                defaultUnit : "cm",
-                maxValue: 55.88,
+                defaultUnit : "pt",
+                maxValue: 1584,
                 minValue: 0,
                 allowAuto   : true,
                 autoText    : this.txtAutoText
@@ -232,7 +232,7 @@ define([    'text!spreadsheeteditor/main/app/template/ParagraphSettingsAdvanced.
                     var properties = (this._originalProps) ? this._originalProps : new Asc.asc_CParagraphProperty();
                     this.Spacing = properties.asc_getSpacing();
                 }
-                this.Spacing.put_After(Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()));
+                this.Spacing.put_After(Common.Utils.Metric.fnRecalcToMM(field.getNumberValue(), Common.Utils.Metric.c_MetricUnits.pt));
             }, this));
             this.spinners.push(this.numSpacingAfter);
 
@@ -473,14 +473,14 @@ define([    'text!spreadsheeteditor/main/app/template/ParagraphSettingsAdvanced.
                 this.cmbSpecial.setValue(this.CurSpecial);
                 this.numSpecialBy.setValue(this.FirstLine!== null ? Math.abs(Common.Utils.Metric.fnRecalcFromMM(this.FirstLine)) : '', true);
 
-                this.numSpacingBefore.setValue((props.asc_getSpacing() !== null && props.asc_getSpacing().asc_getBefore() !== null) ? Common.Utils.Metric.fnRecalcFromMM(props.asc_getSpacing().asc_getBefore()) : '', true);
-                this.numSpacingAfter.setValue((props.asc_getSpacing() !== null && props.asc_getSpacing().asc_getAfter() !== null) ? Common.Utils.Metric.fnRecalcFromMM(props.asc_getSpacing().asc_getAfter()) : '', true);
+                this.numSpacingBefore.setValue((props.asc_getSpacing() !== null && props.asc_getSpacing().asc_getBefore() !== null) ? Common.Utils.Metric.fnRecalcFromMM(props.asc_getSpacing().asc_getBefore(), Common.Utils.Metric.c_MetricUnits.pt) : '', true);
+                this.numSpacingAfter.setValue((props.asc_getSpacing() !== null && props.asc_getSpacing().asc_getAfter() !== null) ? Common.Utils.Metric.fnRecalcFromMM(props.asc_getSpacing().asc_getAfter(), Common.Utils.Metric.c_MetricUnits.pt) : '', true);
 
                 var linerule = props.asc_getSpacing().asc_getLineRule();
                 this.cmbLineRule.setValue((linerule !== null) ? linerule : '', true);
 
                 if(props.asc_getSpacing() !== null && props.asc_getSpacing().asc_getLine() !== null) {
-                    this.numLineHeight.setValue((linerule==c_paragraphLinerule.LINERULE_AUTO) ? props.asc_getSpacing().asc_getLine() : Common.Utils.Metric.fnRecalcFromMM(props.asc_getSpacing().asc_getLine()), true);
+                    this.numLineHeight.setValue((linerule==c_paragraphLinerule.LINERULE_AUTO) ? props.asc_getSpacing().asc_getLine() : Common.Utils.Metric.fnRecalcFromMM(props.asc_getSpacing().asc_getLine(), Common.Utils.Metric.c_MetricUnits.pt), true);
                 } else {
                     this.numLineHeight.setValue('', true);
                 }
@@ -530,16 +530,17 @@ define([    'text!spreadsheeteditor/main/app/template/ParagraphSettingsAdvanced.
             if (this.spinners) {
                 for (var i=0; i<this.spinners.length; i++) {
                     var spinner = this.spinners[i];
-                    spinner.setDefaultUnit(Common.Utils.Metric.getCurrentMetricName());
-                    if (spinner.el.id == 'paragraphadv-spin-spacing' || spinner.el.id == 'paragraphadv-spin-position' || spinner.el.id == 'paragraphadv-spin-spacing-before' || spinner.el.id == 'paragraphadv-spin-spacing-after' )
+                    if(spinner.el.id != 'paragraphadv-spin-spacing-before' && spinner.el.id != 'paragraphadv-spin-spacing-after'&& spinner.el.id != 'paragraphadv-spin-line-height')
+                        spinner.setDefaultUnit(Common.Utils.Metric.getCurrentMetricName());
+                    else if (spinner.el.id == 'paragraphadv-spin-spacing' || spinner.el.id == 'paragraphadv-spin-position' )                    
                         spinner.setStep(Common.Utils.Metric.getCurrentMetric()==Common.Utils.Metric.c_MetricUnits.pt ? 1 : 0.01);
                     else
                         spinner.setStep(Common.Utils.Metric.getCurrentMetric()==Common.Utils.Metric.c_MetricUnits.pt ? 1 : 0.1);
                 }
             }
-            this._arrLineRule[1].defaultUnit  = Common.Utils.Metric.getCurrentMetricName();
+            /*this._arrLineRule[1].defaultUnit  = Common.Utils.Metric.getCurrentMetricName();
             this._arrLineRule[1].minValue = parseFloat(Common.Utils.Metric.fnRecalcFromMM(0.3).toFixed(2));
-            this._arrLineRule[1].step = (Common.Utils.Metric.getCurrentMetric()==Common.Utils.Metric.c_MetricUnits.pt) ? 1 : 0.01;
+            this._arrLineRule[1].step = (Common.Utils.Metric.getCurrentMetric()==Common.Utils.Metric.c_MetricUnits.pt) ? 1 : 0.01;*/
             if (this.CurLineRuleIdx !== null) {
                 this.numLineHeight.setDefaultUnit(this._arrLineRule[this.CurLineRuleIdx].defaultUnit);
                 this.numLineHeight.setStep(this._arrLineRule[this.CurLineRuleIdx].step);
@@ -791,7 +792,7 @@ define([    'text!spreadsheeteditor/main/app/template/ParagraphSettingsAdvanced.
                 if (this.Spacing.get_LineRule() === c_paragraphLinerule.LINERULE_AUTO) {
                     this.numLineHeight.setValue(this._arrLineRule[indexSelectItem].defaultValue);
                 } else {
-                    this.numLineHeight.setValue(Common.Utils.Metric.fnRecalcFromMM(this._arrLineRule[indexSelectItem].defaultValue));
+                    this.numLineHeight.setValue(Common.Utils.Metric.fnRecalcFromMM(this._arrLineRule[indexSelectItem].defaultValue, Common.Utils.Metric.c_MetricUnits.pt));
                 }
                 this.CurLineRuleIdx = indexSelectItem;
             }
@@ -804,7 +805,7 @@ define([    'text!spreadsheeteditor/main/app/template/ParagraphSettingsAdvanced.
                 var properties = (this._originalProps) ? this._originalProps : new Asc.asc_CParagraphProperty();
                 this.Spacing = properties.asc_getSpacing();
             }
-            this.Spacing.put_Line((this.cmbLineRule.getValue()==c_paragraphLinerule.LINERULE_AUTO) ? field.getNumberValue() : Common.Utils.Metric.fnRecalcToMM(field.getNumberValue()));
+            this.Spacing.put_Line((this.cmbLineRule.getValue()==c_paragraphLinerule.LINERULE_AUTO) ? field.getNumberValue() : Common.Utils.Metric.fnRecalcToMM(field.getNumberValue(), Common.Utils.Metric.c_MetricUnits.pt));
         },
 
         textTitle:      'Paragraph - Advanced Settings',

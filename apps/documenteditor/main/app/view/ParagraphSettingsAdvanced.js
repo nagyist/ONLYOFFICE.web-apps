@@ -948,8 +948,10 @@ define([    'text!documenteditor/main/app/template/ParagraphSettingsAdvanced.tem
                         
                     if (spinner.el.id == 'paragraphadv-spin-spacing' || spinner.el.id == 'paragraphadv-spin-position')
                         spinner.setStep(Common.Utils.Metric.getCurrentMetric()==Common.Utils.Metric.c_MetricUnits.pt ? 1 : 0.01);
-                    else if( spinner.el.id == 'paragraphadv-spin-spacing-before' || spinner.el.id == 'paragraphadv-spin-spacing-after')
-                        spinner.setStep(1);                        
+                    else if( spinner.el.id == 'paragraphadv-spin-spacing-before' || spinner.el.id == 'paragraphadv-spin-spacing-after'){
+                        spinner.setStep(1);   
+                        spinner.setDefaultUnit(Common.Utils.Metric.getMetricName(Common.Utils.Metric.c_MetricUnits.pt));
+                    }                     
                     else
                         spinner.setStep(Common.Utils.Metric.getCurrentMetric()==Common.Utils.Metric.c_MetricUnits.pt ? 1 : 0.1);
                 }

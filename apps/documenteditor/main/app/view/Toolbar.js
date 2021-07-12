@@ -1132,7 +1132,7 @@ define([
                     this.listStylesAdditionalMenuItem = new Common.UI.MenuItem({
                         template: _.template(
                             '<div id="id-save-style-container" class = "save-style-container">' +
-                            '<span id="id-save-style-plus" class="plus img-commonctrl"  ></span>' +
+                            '<span id="id-save-style-plus" class="plus"  ></span>' +
                             '<label id="id-save-style-link" class="save-style-link" >' + me.textStyleMenuNew + '</label>' +
                             '</div>')
                     });

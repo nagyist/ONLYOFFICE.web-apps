@@ -5,6 +5,7 @@ export class storeTextSettings {
         makeObservable(this, {
             fontsArray: observable,
             fontName: observable,
+            positionElemList:observable,
             fontSize: observable,
             isBold: observable,
             isItalic: observable,
@@ -39,12 +40,14 @@ export class storeTextSettings {
             changeCustomTextColors: action,
             resetLineSpacing: action,
             resetBackgroundColor: action,
-            changeFontFamily: action
+            changeFontFamily: action,
+            changeHeightElement : action,
         });
     }
 
     fontsArray = [];
     fontName = '';
+    positionElemList = null;
     fontSize = undefined;
     isBold = false;
     isItalic = false;
@@ -171,6 +174,10 @@ export class storeTextSettings {
 
     changeFontFamily(name) {
         this.fontName = name;
+    }
+
+    changeHeightElement(pos) {
+        this.positionElemList = pos;
     }
 
     resetLineSpacing (vc) {

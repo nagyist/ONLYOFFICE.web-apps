@@ -1,4 +1,4 @@
-import React, {Fragment, useState } from 'react';
+import React, {Fragment, useState, useEffect } from 'react';
 import {observer, inject} from "mobx-react";
 import {f7, Swiper, View, SwiperSlide, List, ListItem, Icon, Row, Button, Page, Navbar, NavRight, Segmented, BlockTitle, Link} from 'framework7-react';
 import { useTranslation } from 'react-i18next';
@@ -9,11 +9,17 @@ import { ThemeColorPalette, CustomColorPicker } from '../../../../../common/mobi
 const PageFonts = props => {
     const isAndroid = Device.android;
     const { t } = useTranslation();
+
+    useEffect(() => {
+        $$('.edit-fonts .page-content').scrollTop(positionElement, 1500)
+    }, []);
+
     const storeTextSettings = props.storeTextSettings;
     const size = storeTextSettings.fontSize;
     const displaySize = typeof size === 'undefined' ? t('Edit.textAuto') : size + ' ' + t('Edit.textPt');
     const curFontName = storeTextSettings.fontName;
     const fonts = storeTextSettings.fontsArray;
+    const positionElement = storeTextSettings.positionElemList;
     const [vlFonts, setVlFonts] = useState({
         vlData: {
             items: [],
@@ -30,7 +36,7 @@ const PageFonts = props => {
     };
 
     return (
-        <Page>
+        <Page className="edit-fonts">
             <Navbar title={t('Edit.textFonts')} backLink={t('Edit.textBack')}>
                 {Device.phone &&
                     <NavRight>
@@ -65,11 +71,13 @@ const PageFonts = props => {
                     {vlFonts.vlData.items.map((item, index) => (
                         <ListItem
                             key={index}
+                            className = 'list-item'
                             radio
                             checked={curFontName === item.name}
                             title={item.name}
                             style={{fontFamily: `${item.name}`}}
-                            onClick={() => {storeTextSettings.changeFontFamily(item.name); props.changeFontFamily(item.name)}}
+                            onClick={() => {storeTextSettings.changeFontFamily(item.name); props.changeFontFamily(item.name);
+                                storeTextSettings.changeHeightElement(($$('.list-item').height()*index))}}
                         ></ListItem>
                     ))}
                 </ul>

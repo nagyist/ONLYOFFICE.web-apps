@@ -298,7 +298,9 @@ define([
                 restoreHeight: 640,
                 textRecentlyUsed: me.textRecentlyUsed,
                 recentShapes: recents ? JSON.parse(recents) : null,
-                isFromImage: true
+                isFromImage: true,
+                hideTextRect: true,
+                hideLines: true
             });
             shapePicker.on('item:click', function(picker, item, record, e) {
                 if (me.api) {

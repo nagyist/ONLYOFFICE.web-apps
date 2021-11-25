@@ -444,6 +444,7 @@ class ViewCommentsController extends Component {
         this.onCommentMenuClick = this.onCommentMenuClick.bind(this);
         this.onResolveComment = this.onResolveComment.bind(this);
         this.closeViewCurComments = this.closeViewCurComments.bind(this);
+        this.onAddNewComment = this.onAddNewComment.bind(this);
 
         this.state = {
             isOpenViewCurComments: false
@@ -602,6 +603,29 @@ class ViewCommentsController extends Component {
         }
     }
 
+    onAddNewComment (commentText, documentFlag) {
+        const api = Common.EditorApi.get();
+        let comment;
+        
+        if (typeof Asc.asc_CCommentDataWord !== 'undefined') {
+            comment = new Asc.asc_CCommentDataWord(null);
+        } else {
+            comment = new Asc.asc_CCommentData(null);
+        }
+        if (commentText.length > 0) {
+            comment.asc_putText(commentText);
+            comment.asc_putTime(utcDateToString(new Date()));
+            comment.asc_putOnlyOfficeTime(ooDateToString(new Date()));
+            comment.asc_putUserId(this.props.users.currentUser.asc_getIdOriginal());
+            comment.asc_putUserName(this.props.users.currentUser.asc_getUserName());
+            comment.asc_putSolved(false);
+
+            !!comment.asc_putDocumentFlag && comment.asc_putDocumentFlag(documentFlag);
+
+            api.asc_addComment(comment);
+        }
+    }
+
     showComment (comment) {
         const api = Common.EditorApi.get();
 
@@ -614,8 +638,8 @@ class ViewCommentsController extends Component {
         return(
             <Fragment>
                 {this.props.allComments && <ViewComments wsProps={this.props?.storeWorksheets?.wsProps} onCommentMenuClick={this.onCommentMenuClick} onResolveComment={this.onResolveComment} 
-                    showComment={this.showComment} />}
-                {this.state.isOpenViewCurComments && <ViewCurrentComments wsProps={this.props?.storeWorksheets?.wsProps} opened={this.state.isOpenViewCurComments}
+                    showComment={this.showComment} onAddNewComment={this.onAddNewComment} />}
+                {this.state.isOpenViewCurComments && <ViewCurrentComments wsProps={this.props?.storeWorksheets?.wsProps} opened={this.state.isOpenViewCurComments} onAddNewComment={this.onAddNewComment}
                                                                           closeCurComments={this.closeViewCurComments}
                                                                           onCommentMenuClick={this.onCommentMenuClick}
                                                                           onResolveComment={this.onResolveComment}

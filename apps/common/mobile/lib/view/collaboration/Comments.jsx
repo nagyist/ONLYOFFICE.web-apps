@@ -739,7 +739,7 @@ const ViewComments = inject("storeComments", "storeAppOptions", "storeReview")(o
     )
 }));
 
-const CommentList = inject("storeComments", "storeAppOptions", "storeReview")(observer(({storeComments, storeAppOptions, onCommentMenuClick, onResolveComment, storeReview, wsProps}) => {
+const CommentList = inject("storeComments", "storeAppOptions", "storeReview")(observer(({storeComments, storeAppOptions, onCommentMenuClick, onResolveComment, storeReview, wsProps, onAddNewComment}) => {
     const { t } = useTranslation();
     const _t = t('Common.Collaboration', {returnObjects: true});
     const isAndroid = Device.android;
@@ -772,6 +772,22 @@ const CommentList = inject("storeComments", "storeAppOptions", "storeReview")(ob
         }
     };
 
+    const resizeArea = (text_id, minHeight, maxHeight) => {
+        let area = $$(text_id)[0];
+        let area_hidden = $$(text_id + "_hidden")[0];
+        let text = '';
+
+        area.value.replace(/[<>]/g, '_').split("\n").forEach(function(s) {
+            text = text + '<div>' + s.replace(/\s\s/g, ' &nbsp;') + '&nbsp;</div>'+"\n";
+        });
+
+        area_hidden.innerHTML = text;
+        let height = area_hidden.offsetHeight + 15;
+        height = Math.max(minHeight, height);
+        height = Math.min(maxHeight, height);
+        area.style.height = height + 'px';
+    }
+
     if(!comment) {
         if (comments.length > 0) {
             onViewNextComment();
@@ -782,16 +798,28 @@ const CommentList = inject("storeComments", "storeAppOptions", "storeReview")(ob
     return (
         <Fragment>
             <Toolbar position='bottom'>
-                {!viewMode && 
+                {/* {!viewMode && 
                     <Link className={`btn-add-reply${wsProps?.Objects ? ' disabled' : ''}`} href='#' onClick={() => {onCommentMenuClick('addReply', comment);}}>{_t.textAddReply}</Link>
                 }
                 <div className='comment-navigation row'>
                     <Link href='#' onClick={onViewPrevComment}><Icon slot='media' icon='icon-prev'/></Link>
                     <Link href='#' onClick={onViewNextComment}><Icon slot='media' icon='icon-next'/></Link>
-                </div>
+                </div> */}
+                <div className="comment-text_hidden"><div className="textarea_behavior" id="comment-text_hidden"></div></div>
+                <textarea className="comment-field" id="comment-text" placeholder="@ to mention" onKeyUp={() => resizeArea('#comment-text', 32, 450)}></textarea>
+                <button type="button" className="comment-button" onClick={() => onAddNewComment($$('#comment-text')[0].value, false)}>
+                    <Icon slot="media" icon="icon-comment-button"></Icon>
+                </button>
             </Toolbar>
             <div className='pages'>
                 <Page className='page-current-comment'>
+                    {/* <div className='comment-header'>
+                        <Link href="#">View All</Link>
+                        <div className='comment-navigation row'>
+                            <Link href='#' onClick={onViewPrevComment}><Icon slot='media' icon='icon-prev'/></Link>
+                            <Link href='#' onClick={onViewNextComment}><Icon slot='media' icon='icon-next'/></Link>
+                        </div>
+                    </div> */}
                     <List className='comment-list'>
                         <ListItem>
                             <div slot='header' className='comment-header'>
@@ -868,7 +896,7 @@ const CommentList = inject("storeComments", "storeAppOptions", "storeReview")(ob
 
 }));
 
-const ViewCommentSheet = ({closeCurComments, onCommentMenuClick, onResolveComment, wsProps}) => {
+const ViewCommentSheet = ({closeCurComments, onCommentMenuClick, onResolveComment, wsProps, onAddNewComment}) => {
     useEffect(() => {
         f7.sheet.open('#view-comment-sheet');
     });
@@ -914,19 +942,19 @@ const ViewCommentSheet = ({closeCurComments, onCommentMenuClick, onResolveCommen
             <div id='swipe-handler' className='swipe-container' onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
                 <Icon icon='icon-swipe'/>
             </div>
-            <CommentList wsProps={wsProps} onCommentMenuClick={onCommentMenuClick} onResolveComment={onResolveComment}/>
+            <CommentList wsProps={wsProps} onAddNewComment={onAddNewComment} onCommentMenuClick={onCommentMenuClick} onResolveComment={onResolveComment}/>
         </Sheet>
     )
 };
 
-const ViewCommentPopover = ({onCommentMenuClick, onResolveComment, wsProps}) => {
+const ViewCommentPopover = ({onCommentMenuClick, onResolveComment, wsProps, onAddNewComment}) => {
     useEffect(() => {
         f7.popover.open('#view-comment-popover', '#btn-coauth');
     });
 
     return (
         <Popover id='view-comment-popover' style={{height: '410px'}} closeByOutsideClick={false}>
-            <CommentList wsProps={wsProps} onCommentMenuClick={onCommentMenuClick} onResolveComment={onResolveComment} />
+            <CommentList wsProps={wsProps} onAddNewComment={onAddNewComment} onCommentMenuClick={onCommentMenuClick} onResolveComment={onResolveComment} />
         </Popover>
     )
 };

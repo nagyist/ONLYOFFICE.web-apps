@@ -798,6 +798,15 @@ const CommentList = inject("storeComments", "storeAppOptions", "storeReview")(ob
     return (
         <Fragment>
             <Toolbar position='bottom'>
+                <div className="adding-comment adding-comment_showed">
+                    <div className="comment-text_hidden"><div className="textarea_behavior" id="comment-text_hidden"></div></div>
+                    <textarea className="comment-add-field" id="comment-text" placeholder="@ to mention" onKeyUp={() => resizeArea('#comment-text', 32, 450)}></textarea>
+                    <button type="button" className="adding-comment__button comment-add-button" onClick={() => onAddNewComment($$('#comment-text')[0].value, false)}>
+                        <Icon slot="media" icon="icon-comment-button"></Icon>
+                    </button>
+                </div>
+            </Toolbar>
+            {/* <Toolbar position='bottom'> */}
                 {/* {!viewMode && 
                     <Link className={`btn-add-reply${wsProps?.Objects ? ' disabled' : ''}`} href='#' onClick={() => {onCommentMenuClick('addReply', comment);}}>{_t.textAddReply}</Link>
                 }
@@ -805,12 +814,12 @@ const CommentList = inject("storeComments", "storeAppOptions", "storeReview")(ob
                     <Link href='#' onClick={onViewPrevComment}><Icon slot='media' icon='icon-prev'/></Link>
                     <Link href='#' onClick={onViewNextComment}><Icon slot='media' icon='icon-next'/></Link>
                 </div> */}
-                <div className="comment-text_hidden"><div className="textarea_behavior" id="comment-text_hidden"></div></div>
+                {/* <div className="comment-text_hidden"><div className="textarea_behavior" id="comment-text_hidden"></div></div>
                 <textarea className="comment-field" id="comment-text" placeholder="@ to mention" onKeyUp={() => resizeArea('#comment-text', 32, 450)}></textarea>
                 <button type="button" className="comment-button" onClick={() => onAddNewComment($$('#comment-text')[0].value, false)}>
                     <Icon slot="media" icon="icon-comment-button"></Icon>
-                </button>
-            </Toolbar>
+                </button> */}
+            {/* </Toolbar> */}
             <div className='pages'>
                 <Page className='page-current-comment'>
                     {/* <div className='comment-header'>

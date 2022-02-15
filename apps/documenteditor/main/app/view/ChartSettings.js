@@ -425,30 +425,34 @@ define([
         },
 
         selectCurrentChartStyle: function() {
-            if (!this.cmbChartStyle || this._state.beginPreviewStyles || this._state.previewStylesCount!==this.cmbChartStyle.menuPicker.store.length) return;
+            if (!this.cmbChartStyle || this._state.beginPreviewStyles) return;
 
             this.cmbChartStyle.suspendEvents();
             var rec = this.cmbChartStyle.menuPicker.store.findWhere({data: this._state.ChartStyle});
-            if (!rec) {
+            if (!rec && (this._state.previewStylesCount===this.cmbChartStyle.menuPicker.store.length || this._state.drawCurrentStyle)) {
                 rec = this.cmbChartStyle.menuPicker.store.at(0);
             }
             this.cmbChartStyle.menuPicker.selectRecord(rec);
             this.cmbChartStyle.resumeEvents();
 
-            rec && this.cmbChartStyle.fillComboView(this.cmbChartStyle.menuPicker.getSelectedRec(), true);
-            this._state.currentStyleFound = true;
+            if (rec) {
+                this.cmbChartStyle.fillComboView(this.cmbChartStyle.menuPicker.getSelectedRec(), true);
+                this._state.currentStyleFound = true;
+                this._state.drawCurrentStyle = false;
+            }
         },
 
         onBeginChartStylesPreview: function(count){
             this._state.beginPreviewStyles = true;
             this._state.currentStyleFound = false;
+            this._state.drawCurrentStyle = false;
             this._state.previewStylesCount = count;
         },
 
         onEndChartStylesPreview: function(){
             if (this.cmbChartStyle) {
                 if (this.cmbChartStyle.menuPicker.store.length>0) {
-                    this.selectCurrentChartStyle();
+                    !this._state.currentStyleFound && this.selectCurrentChartStyle();
                     this.cmbChartStyle.menuPicker.scroller.update({alwaysVisibleY: true});
                 } else {
                     this.cmbChartStyle.menuPicker.store.reset();
@@ -465,18 +469,25 @@ define([
                 if (stylesStore) {
                     var stylearray = [];
                     _.each(styles, function(item, index){
+                        var name = item.asc_getName();
                         stylearray.push({
                             imageUrl: item.asc_getImage(),
-                            data    : item.asc_getName(),
+                            data    : name,
                             tip     : me.textStyle + ' ' + item.asc_getName()
                         });
+                        if (name===me._state.ChartStyle)
+                            me._state.drawCurrentStyle = true;
                     });
                     if (this._state.beginPreviewStyles) {
                         this._state.beginPreviewStyles = false;
                         stylesStore.reset(stylearray);
-                    } else
+                        if (this._state.ChartStyle===null)
+                            this._state.drawCurrentStyle = true;
+                    } else {
                         stylesStore.add(stylearray);
+                    }
                 }
+                !this._state.currentStyleFound && this._state.drawCurrentStyle && (stylesStore.length>2) && this.selectCurrentChartStyle();
             }
         },
 

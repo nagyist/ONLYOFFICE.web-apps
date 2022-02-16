@@ -447,6 +447,10 @@ define([
             this._state.currentStyleFound = false;
             this._state.drawCurrentStyle = false;
             this._state.previewStylesCount = count;
+            if (this.cmbChartStyle) {
+                this.cmbChartStyle.menuPicker.store.reset();
+                this.cmbChartStyle.clearComboView();
+            }
         },
 
         onEndChartStylesPreview: function(){
@@ -454,9 +458,6 @@ define([
                 if (this.cmbChartStyle.menuPicker.store.length>0) {
                     !this._state.currentStyleFound && this.selectCurrentChartStyle();
                     this.cmbChartStyle.menuPicker.scroller.update({alwaysVisibleY: true});
-                } else {
-                    this.cmbChartStyle.menuPicker.store.reset();
-                    this.cmbChartStyle.clearComboView();
                 }
                 this.cmbChartStyle.setDisabled(this.cmbChartStyle.menuPicker.store.length<1 || this._locked);
             }

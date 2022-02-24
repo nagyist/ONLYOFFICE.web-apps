@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import {Device} from "../../../utils/device";
 
 import {ReviewController, ReviewChangeController} from "../../controller/collaboration/Review";
+import SharingSettingsController from "../../controller/collaboration/SharingSettings";
 import {PageDisplayMode} from "./Review";
 
 import {ViewCommentsController, ViewCommentsSheetsController} from "../../controller/collaboration/Comments";
@@ -14,6 +15,7 @@ const PageUsers = inject("users")(observer(props => {
     const { t } = useTranslation();
     const _t = t('Common.Collaboration', {returnObjects: true});
     const storeUsers = props.users;
+
     return (
         <Page name="collab__users" className='page-users'>
             <Navbar title={_t.textUsers} backLink={_t.textBack}>
@@ -47,6 +49,10 @@ const routes = [
     {
         path: '/review/',
         component: ReviewController
+    },
+    {
+        path: '/sharing-settings/',
+        component: SharingSettingsController
     },
     {
         path: '/cm-review/',
@@ -117,11 +123,13 @@ const PageCollaboration = inject('storeAppOptions', 'users')(observer(props => {
                             <Icon slot="media" icon="icon-review"></Icon>
                         </ListItem>
                     }
+                    <ListItem link={'/sharing-settings/'} title={t('Common.Collaboration.textSharingSettings')}>
+                        {/* <Icon slot="media" icon="icon-review"></Icon> */}
+                    </ListItem>
                 </List>
             </Page>
         </View>
     )
-
 }));
 class CollaborationView extends Component {
     constructor(props) {

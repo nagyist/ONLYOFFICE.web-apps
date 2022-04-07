@@ -1,6 +1,6 @@
 // Import React and ReactDOM
 import React, { Suspense } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 // Import Framework7
 import Framework7 from 'framework7/lite-bundle';
@@ -31,14 +31,16 @@ import { stores } from './store/mainStore'
 // Init F7 React Plugin
 Framework7.use(Framework7React)
 
+const container = document.getElementById('app');
+const root = createRoot(container);
+
 // Mount React App
-ReactDOM.render(
+root.render(
     <I18nextProvider i18n={i18n}>
         <Provider {...stores}>
-            {/*<Suspense fallback="">*/}
+            {/*<Suspense fallback="loading...">*/}
                 <App />
             {/*</Suspense>*/}
         </Provider>
-    </I18nextProvider>,
-  document.getElementById('app'),
+    </I18nextProvider>
 );

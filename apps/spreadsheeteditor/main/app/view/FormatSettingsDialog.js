@@ -542,6 +542,15 @@ define([
                 }
 
             } else {
+                var clearString = function(item) {
+                    var arrItems = ["(", ")", " ", "-", "$", "₽", "¥", "€", "₩"];
+                    item = item.replaceAll("\\", "");
+                    for (var i = 0; i < arrItems.length; i++) {
+                        if(item.indexOf(arrItems[i]) != -1)
+                            item = item.replaceAll("\""+arrItems[i]+"\"", arrItems[i]);
+                    }
+                    return item;
+                }
                 var info = new Asc.asc_CFormatCellsInfo();
                 info.asc_setType(Asc.c_oAscNumFormatType.Custom);
                 info.asc_setSymbol(valSymbol);
@@ -552,7 +561,7 @@ define([
                 formatsarr.forEach(function(item) {
                     var rec = new Common.UI.DataViewModel();
                     rec.set({
-                        value: me.api.asc_convertNumFormat2NumFormatLocal(item),
+                        value: clearString(me.api.asc_convertNumFormat2NumFormatLocal(item))/*.replaceAll("\\", "").replaceAll("\" \"", " ").replaceAll("\"₽\"", "₽").replaceAll("\"-\"", "-").replaceAll("\"(\"", "(").replaceAll("\")\"", ")")*/,
                         format: item
                     });
                     data.push(rec);
@@ -586,6 +595,8 @@ define([
             this._state = { hasDecimal: hasDecimal, hasNegative: hasNegative, hasSeparator: hasSeparator, hasType: hasType, hasSymbols: hasSymbols, hasCode: hasCode};
 
             !initFormatInfo && this.chLinked.setValue(false, true);
+
+    
         },
 
         textTitle: 'Number Format',

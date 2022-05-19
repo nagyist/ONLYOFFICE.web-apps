@@ -184,54 +184,7 @@
     .inline-svg-code(~'<svg xmlns="http://www.w3.org/2000/svg" width="4px" height="8px" fill="@{color}"><polygon points="0,4 4,8 4,0"/></svg>');
     background-image: @-inline-svg-url;
 }
-
-textarea,.brouse-scroll {
-    @background-svg-fill: #adadad;
-    @background-svg-fill-hover: #f7f7f7;
-    overflow: auto;
-
-    scrollbar-color: @background-toolbar @canvas-background;  //mozila
-    /*explorer*/
-    scrollbar-track-color:  @canvas-background;
-    scrollbar-face-color: @background-toolbar-ie;
-    scrollbar-arrow-color:  @canvas-scroll-thumb-hover-ie;
-    scrollbar-base-color: @border-toolbar-ie;
-    /*------------------------------------*/
-
-    cursor: auto;
-
-    &::-webkit-scrollbar {
-        cursor: default;
-        height: 14px;
-        width: 14px;
-        background-color: @canvas-background;
-        -o-transition: background-color .2s linear;
-        -webkit-transition: background-color .2s linear;
-        -moz-transition: background-color .2s linear;
-        transition: background-color .2s linear;
-    }
-    &::-webkit-scrollbar-corner{
-        background-color: @canvas-background;
-    }
-
-    &::-webkit-scrollbar-thumb, &::-webkit-scrollbar-button {
-        cursor: default;
-        box-shadow: inset 0px 0px 0px 1px @border-toolbar;
-        border-right: @scaled-one-px-value solid @canvas-background;
-        -webkit-border-radius: 0.2ex;
-        background-color: @background-toolbar;
-        background-position: center;
-        background-repeat: no-repeat;
-
-        &:hover {
-            background-color: @canvas-scroll-thumb-hover;
-            box-shadow: inset 0px 0px 0px 1px @canvas-scroll-thumb-border-hover;
-        }
-
-        &:active {
-            background-color: var(--canvas-scroll-thumb-pressed);
-        }
-    }
+.scroll-images(@background-svg-fill,@background-svg-fill-hover){
     &::-webkit-scrollbar-thumb {
         &:vertical {
             .img-scroll-y(@background-svg-fill,5);
@@ -287,59 +240,72 @@ textarea,.brouse-scroll {
         }
     }
 }
+
+textarea,.brouse-scroll {
+    
+    overflow: auto;
+
+    scrollbar-color: @background-toolbar @canvas-background;  //mozila
+    /*explorer*/
+    scrollbar-track-color:  @canvas-background;
+    scrollbar-face-color: @background-toolbar-ie;
+    scrollbar-arrow-color:  @canvas-scroll-thumb-hover-ie;
+    scrollbar-base-color: @border-toolbar-ie;
+    /*------------------------------------*/
+
+    cursor: auto;
+
+    &::-webkit-scrollbar {
+        cursor: default;
+        height: 14px;
+        width: 14px;
+        background-color: @canvas-background;
+        -o-transition: background-color .2s linear;
+        -webkit-transition: background-color .2s linear;
+        -moz-transition: background-color .2s linear;
+        transition: background-color .2s linear;
+    }
+    &::-webkit-scrollbar-corner{
+        background-color: @canvas-background;
+    }
+
+    &::-webkit-scrollbar-thumb, &::-webkit-scrollbar-button {
+        cursor: default;
+        box-shadow: inset 0px 0px 0px 1px @border-toolbar;
+        border-right: @scaled-one-px-value solid @canvas-background;
+        -webkit-border-radius: 0.2ex;
+        background-color: @background-toolbar;
+        background-position: center;
+        background-repeat: no-repeat;
+
+        &:hover {
+            background-color: @canvas-scroll-thumb-hover;
+            box-shadow: inset 0px 0px 0px 1px @canvas-scroll-thumb-border-hover;
+        }
+
+        &:active {
+            background-color: var(--canvas-scroll-thumb-pressed);
+        }
+    }
+    &::-webkit-scrollbar-button {
+        height: 14px;
+        width: 14px;
+        border: @scaled-one-px-value solid @canvas-background;
+        &:vertical {
+            border-left-width: 0;
+            height: 15px;
+        }
+        &:horizontal {
+            border-top-width: 0;
+            width: 15px;
+        }
+    }
+    .scroll-images(#adadad,#f7f7f7);
+}
 .theme-dark{
     textarea,.brouse-scroll
     {
-        @background-svg-fill: #999;
-        @background-svg-fill-hover: #404040;
-
-        &::-webkit-scrollbar-thumb {
-            &:vertical {
-                .img-scroll-y(@background-svg-fill,5);
-                &:hover {
-                    .img-scroll-y(@background-svg-fill-hover, 5);
-                }
-            }
-            &:horizontal {
-                .img-scroll-x(@background-svg-fill,5);
-                &:hover {
-                    .img-scroll-x(@background-svg-fill-hover, 5);
-                }
-            }
-        }
-
-        &::-webkit-scrollbar-button {
-            &:vertical {
-                &:decrement {
-                    .arrow-top(@background-svg-fill);
-                    &:hover {
-                        .arrow-top(@background-svg-fill-hover);
-                    }
-                }
-                &:increment {
-                    .arrow-down(@background-svg-fill);
-                    &:hover {
-                        .arrow-down(@background-svg-fill-hover);
-                    }
-                }
-            }
-
-            &:horizontal {
-                &:decrement {
-                    .arrow-left(@background-svg-fill);
-                    &:hover {
-                        .arrow-left(@background-svg-fill-hover);
-                    }
-                }
-                &:horizontal:increment {
-                    .arrow-right(@background-svg-fill);
-
-                    &:hover {
-                        .arrow-right(@background-svg-fill-hover);
-                    }
-                }
-            }
-        }
+        .scroll-images(#999,#404040);
     }
 
 }

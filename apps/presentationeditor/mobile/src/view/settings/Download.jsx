@@ -29,6 +29,12 @@ const Download = props => {
                 <ListItem title="OTP" onClick={() => props.onSaveFormat(Asc.c_oAscFileType.OTP)}>
                     <Icon slot="media" icon="icon-format-otp"></Icon>
                 </ListItem>
+                <ListItem title="PNG" onClick={() => props.onSaveFormat(Asc.c_oAscFileType.PNG)}>
+                    <Icon slot="media" icon="icon-format-png"></Icon>
+                </ListItem>
+                <ListItem title="JPG" onClick={() => props.onSaveFormat(Asc.c_oAscFileType.JPG)}>
+                    <Icon slot="media" icon="icon-format-jpg"></Icon>
+                </ListItem>
             </List>
         </Page>
     )

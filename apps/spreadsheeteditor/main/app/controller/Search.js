@@ -425,12 +425,12 @@ define([
                 me.resultItems = [];
                 data.forEach(function (item, ind) {
                     var isSelected = ind === me._state.currentResult;
-                    var tr = '<div class="item" style="width: 100%;">' +
-                        '<div class="sheet">' + (item[1] ? item[1] : '') + '</div>' +
-                        '<div class="name">' + (item[2] ? item[2] : '') + '</div>' +
-                        '<div class="cell">' + (item[3] ? item[3] : '') + '</div>' +
-                        '<div class="value">' + (item[4] ? item[4] : '') + '</div>' +
-                        '<div class="formula">' + (item[5] ? item[5] : '') + '</div>' +
+                    var tr = '<div class="item">' +
+                        '<div data-col="sheet" data-index="0">' + (item[1] ? item[1] : '') + '</div>' +
+                        '<div data-col="name" data-index="1">' + (item[2] ? item[2] : '') + '</div>' +
+                        '<div data-col="cell" data-index="2">' + (item[3] ? item[3] : '') + '</div>' +
+                        '<div data-col="value" data-index="3">' + (item[4] ? item[4] : '') + '</div>' +
+                        '<div data-col="formula" data-index="4">' + (item[5] ? item[5] : '') + '</div>' +
                         '</div>';
                     var $item = $(tr).appendTo($innerResults);
                     if (isSelected) {
@@ -449,7 +449,7 @@ define([
         },
 
         addTooltips: function (item, data) {
-            var cells = [item.find('.sheet'), item.find('.name'), item.find('.cell'), item.find('.value'), item.find('.formula')],
+            var cells = [item.find('[data-col="sheet"]'), item.find('[data-col="name"]'), item.find('[data-col="cell"]'), item.find('[data-col="value"]'), item.find('[data-col="formula"]')],
                 tips = [data[1], data[2], data[3], data[4], data[5]];
             cells.forEach(function (el, ind) {
                 var tip = tips[ind];

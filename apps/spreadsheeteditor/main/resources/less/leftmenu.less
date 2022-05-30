@@ -754,39 +754,98 @@
     }
     #search-results {
         padding: 0;
-        .search-table {
-            padding-top: 5px;
-            width:100%;
+        width: 100%;
+        .search-header {
+            position: absolute;
+            top: 0;
+            left: 0;
             height: 100%;
-            position: relative;
+            min-width: 100%;
+        }
+        .search-table {
+            height: calc(100% - 28px);
+            min-width: 100%;
+            position: absolute;
+            top: 28px;
         }
         .header-item {
-            width:16%;
-            display: inline-block;
+            position: absolute;
+            top: 4px;
+            width: 42px;
             height: 18px;
+            display: inline-block;
+            line-height: 18px;
             text-align: start;
             font-weight: normal;
             padding-left: 4px;
-            padding-top: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            &[data-col="sheet"] {
+                left: 0;
+            }
+            &[data-col="name"] {
+                left: 42px;
+            }
+            &[data-col="cell"] {
+                left: 84px;
+            }
+            &[data-col="value"] {
+                left: 126px;
+            }
+            &[data-col="formula"] {
+                left: 168px;
+            }
             &:not(:first-child) {
                 border-left: @scaled-one-px-value-ie solid @border-divider-ie;
                 border-left: @scaled-one-px-value solid @border-divider;
             }
             &:last-child {
-                width:36%;
+                width: calc(100% - 168px);
+            }
+            &.zero-width {
+                display: none;
+            }
+        }
+        .header-resizer {
+            position: absolute;
+            height: 100%;
+            width: 4px;
+            cursor: col-resize;
+            z-index: @zindex-dropdown - 10;
+            background: transparent;
+            border: 0 none;
+            opacity: 0;
+            &[data-resizer="name"] {
+                left: calc(42px - 2px);
+            }
+            &[data-resizer="cell"] {
+                left: calc(84px - 2px);
+            }
+            &[data-resizer="value"] {
+                left: calc(126px - 2px);
+            }
+            &[data-resizer="formula"] {
+                left: calc(168px - 2px);
+            }
+            &.move {
+                opacity: 0.4;
+                border-left: solid @scaled-one-px-value-ie @border-toolbar-ie;
+                border-left: solid @scaled-one-px-value @border-toolbar;
+                border-right: solid @scaled-one-px-value-ie @border-toolbar-ie;
+                border-right: solid @scaled-one-px-value @border-toolbar;
             }
         }
         .search-items {
-            height: calc(100% - 24px);
-            position: absolute;
-            top: 28px;
+            height: 100%;
+            position: relative;
             width: 100%;
             overflow: hidden;
             .item {
                 padding: 0;
                 display: flex;
                 div {
-                    width: 16%;
+                    flex-shrink: 0;
+                    width: 42px;
                     padding-left: 4px;
                     height: 28px;
                     line-height: 28px;
@@ -794,7 +853,10 @@
                     overflow: hidden;
                     text-overflow: ellipsis;
                     &:last-child {
-                        width: 36%;
+                        width: calc(100% - 168px);
+                    }
+                    &.zero-width {
+                        display: none;
                     }
                 }
             }

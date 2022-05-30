@@ -52,6 +52,12 @@ define([
             Common.UI.BaseView.prototype.initialize.call(this, arguments);
 
             this.mode = false;
+            this.resizeResults = {
+                events: {
+                    mousemove: _.bind(this.resultsResizeMove, this),
+                    mouseup: _.bind(this.resultsResizeStop, this)
+                }
+            };
 
             window.SSE && (this.extendedOptions = Common.localStorage.getBool('sse-search-options-extended', true));
         },
@@ -252,13 +258,19 @@ define([
                     this.cmbSearch.setValue(0);
                     this.cmbLookIn.setValue(0);
 
-                    var tableTemplate = '<div class="search-table">' +
-                        '<div class="header-item">' + this.textSheet + '</div>' +
-                        '<div class="header-item">' + this.textName + '</div>' +
-                        '<div class="header-item">' + this.textCell + '</div>' +
-                        '<div class="header-item">' + this.textValue + '</div>' +
-                        '<div class="header-item">' + this.textFormula + '</div>' +
-                        '<div class="ps-container oo search-items"></div>' +
+                    var tableTemplate = '<div class="search-header">' +
+                            '<div class="header-item" data-col="sheet">' + this.textSheet + '</div>' +
+                            '<div class="header-resizer" data-resizer="name" data-index="0"></div>' +
+                            '<div class="header-item" data-col="name">' + this.textName + '</div>' +
+                            '<div class="header-resizer" data-resizer="cell" data-index="1"></div>' +
+                            '<div class="header-item" data-col="cell">' + this.textCell + '</div>' +
+                            '<div class="header-resizer" data-resizer="value" data-index="2"></div>' +
+                            '<div class="header-item" data-col="value">' + this.textValue + '</div>' +
+                            '<div class="header-resizer" data-resizer="formula" data-index="3"></div>' +
+                            '<div class="header-item" data-col="formula">' + this.textFormula + '</div>' +
+                        '</div>' +
+                        '<div class="search-table">' +
+                            '<div class="ps-container oo search-items"></div>' +
                         '</div>',
                         $resultTable = $(tableTemplate).appendTo(this.$resultsContainer);
                     this.$resultsContainer.scroller = new Common.UI.Scroller({
@@ -268,6 +280,21 @@ define([
                         minScrollbarLength: 40,
                         alwaysVisibleY: true
                     });
+                    this.$resultsContainer.scrollerX = new Common.UI.Scroller({
+                        el: this.$resultsContainer,
+                        includePadding: true,
+                        useKeyboard: true,
+                        minScrollbarLength: 40,
+                        alwaysVisibleX: true
+                    });
+                    var resizers = $resultTable.find('.header-resizer');
+                    _.each(resizers, _.bind(function (item) {
+                        var $el = $(item),
+                            data = $el.data('resizer'),
+                            $col = $resultTable.find('[data-col=' + data + ']');
+                        $el.on('mousedown', {col: $col, resizer: $el, data: data}, _.bind(this.resultsResizeStart, this));
+                    }, this));
+                    Common.NotificationCenter.on('layout:resizestop', _.bind(this.onLayoutResize, this));
                 } else {
                     this.$resultsContainer.scroller = new Common.UI.Scroller({
                         el: this.$resultsContainer,
@@ -279,7 +306,9 @@ define([
                 }
                 Common.NotificationCenter.on('window:resize', function() {
                     me.$resultsContainer.outerHeight($('#search-box').outerHeight() - $('#search-header').outerHeight() - $('#search-adv-settings').outerHeight());
+
                     me.$resultsContainer.scroller.update({alwaysVisibleY: true});
+                    window.SSE && me.$resultsContainer.scrollerX.update({alwaysVisibleX: true});
                 });
             }
 
@@ -379,6 +408,105 @@ define([
         disableReplaceButtons: function (disable) {
             this.btnReplace.setDisabled(disable);
             this.btnReplaceAll.setDisabled(disable);
+        },
+
+        resultsResizeStart: function (e) {
+            $(document).on('mousemove', this.resizeResults.events.mousemove)
+                .on('mouseup', this.resizeResults.events.mouseup);
+
+            e.data.resizer.addClass('move');
+
+            this.resizeResults.$resizer = e.data.resizer;
+            this.resizeResults.$col = e.data.col;
+            this.resizeResults.data = e.data.data;
+
+            this.resizeResults.currentIndex = parseInt(this.resizeResults.$resizer.data('index'));
+            this.resizeResults.containerLeft = $('#search-results').offset().left;
+            this.resizeResults.min = this.resizeResults.currentIndex === 0 ? 0 :
+                this.$resultsContainer.find('.header-resizer[data-index=' + (this.resizeResults.currentIndex - 1) + ']').offset().left - this.resizeResults.containerLeft; // left border
+            this.resizeResults.max = Common.Utils.innerWidth(); // document width
+            this.resizeResults.initX = e.pageX*Common.Utils.zoom() - this.resizeResults.containerLeft; // start position
+
+            console.log('current index ', this.resizeResults.currentIndex);
+            console.log('initX ', this.resizeResults.initX);
+            console.log('max/doc width ', this.resizeResults.max);
+            console.log('min 0/header resizer left - container left border ', this.resizeResults.min);
+        },
+
+        resultsResizeMove: function (e) {
+            var zoom = (e instanceof jQuery.Event) ? Common.Utils.zoom() : 1,
+                value = e.pageX*zoom - this.resizeResults.containerLeft;
+            this.resizeResults.currentX = Math.min(Math.max(this.resizeResults.min, value), this.resizeResults.max);
+            this.resizeResults.$resizer.css('left', this.resizeResults.currentX + this.$resultsContainer.scrollLeft() + 'px');
+
+            console.log('current x ', this.resizeResults.currentX);
+            console.log('resizer position (+scroll) ', this.resizeResults.currentX + this.$resultsContainer.scrollLeft());
+        },
+
+        resultsResizeStop: function (e) {
+            this.resizeResults.$resizer.removeClass('move');
+            $(document).off('mousemove', this.resizeResults.events.mousemove)
+                .off('mouseup', this.resizeResults.events.mouseup);
+
+            var delta = this.resizeResults.currentX - this.resizeResults.initX,
+                cols = this.$resultsContainer.find('.header-item'),
+                col = $(cols[this.resizeResults.currentIndex]),
+                newWidth = (col.hasClass('zero-width') ? 0 : col.outerWidth()) + delta,
+                resizers = this.$resultsContainer.find('.header-resizer');
+            col.width(newWidth < 0.1 ? 0 : newWidth - 4 - 1 + 2); // change width in header, 4 - padding, 1 - border, 2 - half of width of resizer
+            col[newWidth < 0.1 ? 'addClass' : 'removeClass']('zero-width');
+            console.log('cols ', cols);
+            console.log('new col width', newWidth);
+            console.log('new col width without padding', newWidth - 4 - 1 + 2);
+
+            var resTable = this.$resultsContainer.find('.search-table');
+            resTable.css('min-width', (resTable.outerWidth() + delta) + 'px');
+            console.log('new table width ', resTable.outerWidth() + delta);
+            //resTable.css('min-width', '100%');
+
+            var resCols = resTable.find('.item [data-index=' + this.resizeResults.currentIndex + ']'), // change col width in table
+                resColWidth = newWidth < 0.1 ? 0 : newWidth - 4 + 2; // 4 - padding, 2 - half of width of resizer
+            _.each(resCols, function (item) {
+                $(item).width(resColWidth);
+                $(item)[resColWidth < 0.1 ? 'addClass' : 'removeClass']('zero-width');
+            });
+            console.log('current resCols', resCols);
+            console.log('new width current resCols', resColWidth);
+
+            // change left positions of resizers on right side
+            for(var i = this.resizeResults.currentIndex + 1; i < 5; i++) {
+                var el = $(cols[i]),
+                    elLeft = el.offset().left - this.resizeResults.containerLeft + this.$resultsContainer.scrollLeft() + delta + 2;
+                el.css('left', elLeft + 'px');
+                console.log('el ', el);
+                console.log('el left ', elLeft);
+                var resizer = resizers[i];
+                console.log(resizer);
+                if (resizer) {
+                    var resizerLeft = $(resizer).offset().left - this.resizeResults.containerLeft + this.$resultsContainer.scrollLeft() + delta + 2;
+                    $(resizer).css('left', resizerLeft + 'px');
+                    console.log('resizer left ', resizerLeft);
+                }
+            }
+
+            this.updateFormulaColWidth();
+            this.$resultsContainer.scrollerX.update({alwaysVisibleX: true});
+        },
+
+        onLayoutResize: function () {
+            this.$resultsContainer.find('.search-table').width(this.$resultsContainer.outerWidth() + this.$resultsContainer.scrollLeft() + 'px');
+
+            this.updateFormulaColWidth();
+            this.$resultsContainer.scrollerX.update({alwaysVisibleX: true});
+        },
+
+        updateFormulaColWidth: function () {
+            var formulaCol = this.$resultsContainer.find('[data-col="formula"]'),
+                formulaLeftBorder = window.getComputedStyle(formulaCol[0],null).getPropertyValue("left"),
+                newWidth = this.$resultsContainer.find('.search-table').outerWidth() - parseInt(formulaLeftBorder) - 4;
+            formulaCol.width(newWidth + 'px');
+
+            console.log('update formula width ', newWidth);
         },
 
         textFind: 'Find',

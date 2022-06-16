@@ -20,7 +20,7 @@ html{
 
 /* thimb*/
 ::-webkit-scrollbar-thumb {
-    box-shadow: inset 0px 0px 0px 1px #cbcbcb;
+    box-shadow: inset 0px 0px 0px 0.5px #cbcbcb;
     background: #f7f7f7;
     -webkit-border-radius: 0.1ex;
     border: #eee 1px solid;
@@ -61,7 +61,7 @@ html{
 ::-webkit-scrollbar-button:single-button {
     height: 14px;
     width: 14px;
-    box-shadow: inset 0px 0px 0px 1px #cbcbcb;
+    box-shadow: inset 0px 0px 0px 0.5px #cbcbcb;
     border: #eee 1px solid;
     background-color: #f7f7f7;
     background-position: center;

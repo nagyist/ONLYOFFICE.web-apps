@@ -410,6 +410,44 @@ define([
             this.btnReplaceAll.setDisabled(disable);
         },
 
+        fillResultColsSize: function () {
+            this.resizeResults.currentWidths = [];
+            this.resizeResults.currentResizersPosition = [];
+
+            var headerCols = this.$resultsContainer.find('.header-item'),
+                resizers = this.$resultsContainer.find('.header-resizer');
+            _.each(headerCols, _.bind(function (item) {
+                var data = $(item).data('col'),
+                    resCol = this.$resultsContainer.find('.search-items [data-col=' + data + ']')[0];
+                this.resizeResults.currentWidths.push({
+                    name: data,
+                    headerWidth: $(item).outerWidth(),
+                    resultWidth: $(resCol).outerWidth()
+                });
+            }, this));
+            _.each(resizers, _.bind(function (item) {
+                this.resizeResults.currentResizersPosition.push($(item).position().left);
+            }, this));
+
+            console.log('this.resizeResults.currentWidths', this.resizeResults.currentWidths);
+            console.log('this.resizeResults.currentResizersPosition', this.resizeResults.currentResizersPosition);
+        },
+
+        applyResultColsSize: function () {
+            if (this.resizeResults.isChanged) {
+                var headerCols = this.$resultsContainer.find('.header-item'),
+                    resizers = this.$resultsContainer.find('.header-resizer');
+                _.each(headerCols, _.bind(function (item, index) {
+                    var currentWidth = this.resizeResults.currentWidths[index];
+                    $(item).width(currentWidth.headerWidth);
+                    this.$resultsContainer.find('.search-items [data-col=' + currentWidth.name + ']').width(currentWidth.resultWidth);
+                }, this));
+                _.each(resizers, _.bind(function (item, index) {
+                    $(item).position({left: this.resizeResults.currentResizersPosition[index]});
+                }, this));
+            }
+        },
+
         resultsResizeStart: function (e) {
             $(document).on('mousemove', this.resizeResults.events.mousemove)
                 .on('mouseup', this.resizeResults.events.mouseup);
@@ -431,6 +469,9 @@ define([
             console.log('initX ', this.resizeResults.initX);
             console.log('max/doc width ', this.resizeResults.max);
             console.log('min 0/header resizer left - container left border ', this.resizeResults.min);
+
+            this.fillResultColsSize();
+            this.resizeResults.isChanged = true;
         },
 
         resultsResizeMove: function (e) {
@@ -491,6 +532,8 @@ define([
 
             this.updateFormulaColWidth();
             this.$resultsContainer.scrollerX.update({alwaysVisibleX: true});
+
+            this.fillResultColsSize();
         },
 
         onLayoutResize: function () {

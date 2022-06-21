@@ -445,6 +445,7 @@ define([
                     me.addTooltips($item, item);
                 });
                 this.view.$resultsContainer.show();
+                this.view.applyResultColsSize();
             }
         },
 

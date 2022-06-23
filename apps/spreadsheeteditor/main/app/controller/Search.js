@@ -445,7 +445,11 @@ define([
                     me.addTooltips($item, item);
                 });
                 this.view.$resultsContainer.show();
-                this.view.applyResultColsSize();
+                if (this.view.resizeResults.defaultWidths.length === 0) {
+                    this.view.fillDefaultResultColsSize();
+                } else {
+                    this.view.applyResultColsSize();
+                }
             }
         },
 

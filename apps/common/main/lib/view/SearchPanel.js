@@ -53,6 +53,10 @@ define([
 
             this.mode = false;
             this.resizeResults = {
+                defaultWidths: [],
+                defaultResizersPosition: [],
+                currentWidths: [],
+                currentResizersPosition: [],
                 events: {
                     mousemove: _.bind(this.resultsResizeMove, this),
                     mouseup: _.bind(this.resultsResizeStop, this)
@@ -410,27 +414,49 @@ define([
             this.btnReplaceAll.setDisabled(disable);
         },
 
-        fillResultColsSize: function () {
-            this.resizeResults.currentWidths = [];
-            this.resizeResults.currentResizersPosition = [];
+        fillDefaultResultColsSize: function () {
+            this.fillResultColsSize(true);
+        },
+
+        resetToDefaultResultColsSize: function () {
+            this.resizeResults.currentWidths.length = 0;
+            this.resizeResults.currentResizersPosition.length = 0;
+            _.each(this.resizeResults.defaultWidths, _.bind(function (item) {
+                this.resizeResults.currentWidths.push({
+                    name: item.name,
+                    headerWidth: item.headerWidth,
+                    resultWidth: item.resultWidth
+                });
+            }, this));
+            _.each(this.resizeResults.defaultResizersPosition, _.bind(function (item) {
+                this.resizeResults.currentResizersPosition.push(item);
+            }, this));
+        },
+
+        fillResultColsSize: function (isDefaultSize) {
+            var currentWidths = isDefaultSize ? this.resizeResults.defaultWidths : this.resizeResults.currentWidths,
+                currentResizersPosition = isDefaultSize ? this.resizeResults.defaultResizersPosition : this.resizeResults.currentResizersPosition;
+
+            currentWidths.length = 0;
+            currentResizersPosition.length = 0;
 
             var headerCols = this.$resultsContainer.find('.header-item'),
                 resizers = this.$resultsContainer.find('.header-resizer');
             _.each(headerCols, _.bind(function (item) {
                 var data = $(item).data('col'),
                     resCol = this.$resultsContainer.find('.search-items [data-col=' + data + ']')[0];
-                this.resizeResults.currentWidths.push({
+                currentWidths.push({
                     name: data,
                     headerWidth: $(item).outerWidth(),
                     resultWidth: $(resCol).outerWidth()
                 });
             }, this));
             _.each(resizers, _.bind(function (item) {
-                this.resizeResults.currentResizersPosition.push($(item).position().left);
+                currentResizersPosition.push($(item).position().left);
             }, this));
 
-            console.log('this.resizeResults.currentWidths', this.resizeResults.currentWidths);
-            console.log('this.resizeResults.currentResizersPosition', this.resizeResults.currentResizersPosition);
+            console.log('this.resizeResults.currentWidths', currentWidths);
+            console.log('this.resizeResults.currentResizersPosition', currentResizersPosition);
         },
 
         applyResultColsSize: function () {
@@ -439,8 +465,8 @@ define([
                     resizers = this.$resultsContainer.find('.header-resizer');
                 _.each(headerCols, _.bind(function (item, index) {
                     var currentWidth = this.resizeResults.currentWidths[index];
-                    $(item).width(currentWidth.headerWidth);
-                    this.$resultsContainer.find('.search-items [data-col=' + currentWidth.name + ']').width(currentWidth.resultWidth);
+                    $(item).outerWidth(currentWidth.headerWidth);
+                    this.$resultsContainer.find('.search-items [data-col=' + currentWidth.name + ']').outerWidth(currentWidth.resultWidth);
                 }, this));
                 _.each(resizers, _.bind(function (item, index) {
                     $(item).position({left: this.resizeResults.currentResizersPosition[index]});
@@ -479,9 +505,6 @@ define([
                 value = e.pageX*zoom - this.resizeResults.containerLeft;
             this.resizeResults.currentX = Math.min(Math.max(this.resizeResults.min, value), this.resizeResults.max);
             this.resizeResults.$resizer.css('left', this.resizeResults.currentX + this.$resultsContainer.scrollLeft() + 'px');
-
-            console.log('current x ', this.resizeResults.currentX);
-            console.log('resizer position (+scroll) ', this.resizeResults.currentX + this.$resultsContainer.scrollLeft());
         },
 
         resultsResizeStop: function (e) {
@@ -494,39 +517,29 @@ define([
                 col = $(cols[this.resizeResults.currentIndex]),
                 newWidth = (col.hasClass('zero-width') ? 0 : col.outerWidth()) + delta,
                 resizers = this.$resultsContainer.find('.header-resizer');
-            col.width(newWidth < 0.1 ? 0 : newWidth - 4 - 1 + 2); // change width in header, 4 - padding, 1 - border, 2 - half of width of resizer
+            col.outerWidth(newWidth < 0.1 ? 0 : newWidth + 2); // change width in header, 2 - half of width of resizer
             col[newWidth < 0.1 ? 'addClass' : 'removeClass']('zero-width');
-            console.log('cols ', cols);
-            console.log('new col width', newWidth);
-            console.log('new col width without padding', newWidth - 4 - 1 + 2);
 
             var resTable = this.$resultsContainer.find('.search-table');
             resTable.css('min-width', (resTable.outerWidth() + delta) + 'px');
-            console.log('new table width ', resTable.outerWidth() + delta);
             //resTable.css('min-width', '100%');
 
             var resCols = resTable.find('.item [data-index=' + this.resizeResults.currentIndex + ']'), // change col width in table
-                resColWidth = newWidth < 0.1 ? 0 : newWidth - 4 + 2; // 4 - padding, 2 - half of width of resizer
+                resColWidth = newWidth < 0.1 ? 0 : newWidth + 2; // 2 - half of width of resizer
             _.each(resCols, function (item) {
-                $(item).width(resColWidth);
+                $(item).outerWidth(resColWidth);
                 $(item)[resColWidth < 0.1 ? 'addClass' : 'removeClass']('zero-width');
             });
-            console.log('current resCols', resCols);
-            console.log('new width current resCols', resColWidth);
 
             // change left positions of resizers on right side
             for(var i = this.resizeResults.currentIndex + 1; i < 5; i++) {
                 var el = $(cols[i]),
                     elLeft = el.offset().left - this.resizeResults.containerLeft + this.$resultsContainer.scrollLeft() + delta + 2;
                 el.css('left', elLeft + 'px');
-                console.log('el ', el);
-                console.log('el left ', elLeft);
                 var resizer = resizers[i];
-                console.log(resizer);
                 if (resizer) {
                     var resizerLeft = $(resizer).offset().left - this.resizeResults.containerLeft + this.$resultsContainer.scrollLeft() + delta + 2;
                     $(resizer).css('left', resizerLeft + 'px');
-                    console.log('resizer left ', resizerLeft);
                 }
             }
 
@@ -548,8 +561,6 @@ define([
                 formulaLeftBorder = window.getComputedStyle(formulaCol[0],null).getPropertyValue("left"),
                 newWidth = this.$resultsContainer.find('.search-table').outerWidth() - parseInt(formulaLeftBorder) - 4;
             formulaCol.width(newWidth + 'px');
-
-            console.log('update formula width ', newWidth);
         },
 
         textFind: 'Find',

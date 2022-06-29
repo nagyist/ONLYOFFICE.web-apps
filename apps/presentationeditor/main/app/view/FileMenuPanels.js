@@ -748,7 +748,6 @@ define([
         strZoom: 'Default Zoom Value',
         okButtonText: 'Apply',
         txtFitSlide: 'Fit to Slide',
-        txtInput: 'Alternate Input',
         txtWin: 'as Windows',
         txtMac: 'as OS X',
         txtNative: 'Native',
@@ -767,7 +766,6 @@ define([
         txtInch: 'Inch',
         txtFitWidth: 'Fit to Width',
         textForceSave: 'Save to Server',
-        strForcesave: 'Always save to server (otherwise save to server on document close)',
         txtSpellCheck: 'Spell Checking',
         txtCacheMode: 'Default cache mode',
         strMacrosSettings: 'Macros Settings',
@@ -777,7 +775,6 @@ define([
         txtWarnMacrosDesc: 'Disable all macros with notification',
         txtRunMacrosDesc: 'Enable all macros without notification',
         txtStopMacrosDesc: 'Disable all macros without notification',
-        strPaste: 'Cut, copy and paste',
         strPasteButton: 'Show Paste Options button when content is pasted',
         txtProofing: 'Proofing',
         strTheme: 'Theme',
@@ -1598,8 +1595,19 @@ define([
                             store.url = 'resources/help/{{DEFAULT_LANG}}/Contents.json';
                             store.fetch(config);
                         } else {
-                            me.urlPref = 'resources/help/{{DEFAULT_LANG}}/';
-                            store.reset(me.en_data);
+                            if ( Common.Controllers.Desktop.isActive() ) {
+                                if ( store.contentLang === '{{DEFAULT_LANG}}' || !Common.Controllers.Desktop.helpUrl() )
+                                    me.iFrame.src = '../../common/main/resources/help/download.html';
+                                else {
+                                    store.contentLang = store.contentLang === lang ? '{{DEFAULT_LANG}}' : lang;
+                                    me.urlPref = Common.Controllers.Desktop.helpUrl() + '/' + lang + '/';
+                                    store.url = me.urlPref + '/Contents.json';
+                                    store.fetch(config);
+                                }
+                            } else {
+                                me.urlPref = 'resources/help/{{DEFAULT_LANG}}/';
+                                store.reset(me.en_data);
+                            }
                         }
                     },
                     success: function () {

@@ -4,6 +4,7 @@
   "common.view.modals.txtHeight": "Înălțime",
   "common.view.modals.txtShare": "Partajare link",
   "common.view.modals.txtWidth": "Lățime",
+  "common.view.SearchBar.textFind": "Găsire",
   "DE.ApplicationController.convertationErrorText": "Conversia nu a reușit.",
   "DE.ApplicationController.convertationTimeoutText": "Timpul de așteptare pentru conversie a expirat.",
   "DE.ApplicationController.criticalErrorTitle": "Eroare",
@@ -35,7 +36,7 @@
   "DE.ApplicationController.textSubmited": "<b>Formularul a fost remis cu succes</b><br>Faceţi clic pentru a închide sfatul",
   "DE.ApplicationController.txtClose": "Închidere",
   "DE.ApplicationController.txtEmpty": "(Gol)",
-  "DE.ApplicationController.txtPressLink": "Apăsați Ctrl și faceți clic pe linkul",
+  "DE.ApplicationController.txtPressLink": "Apăsați %1 și faceți clic pe linkul",
   "DE.ApplicationController.unknownErrorText": "Eroare necunoscută.",
   "DE.ApplicationController.unsupportedBrowserErrorText": "Browserul nu este compatibil.",
   "DE.ApplicationController.waitText": "Vă rugăm să așteptați...",
@@ -46,5 +47,6 @@
   "DE.ApplicationView.txtFileLocation": "Deschidere locația fișierului",
   "DE.ApplicationView.txtFullScreen": "Ecran complet",
   "DE.ApplicationView.txtPrint": "Imprimare",
+  "DE.ApplicationView.txtSearch": "Căutare",
   "DE.ApplicationView.txtShare": "Partajează"
 }

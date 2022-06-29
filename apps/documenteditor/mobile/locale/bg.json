@@ -6,7 +6,8 @@
     "textEmail": "Email",
     "textPoweredBy": "Powered By",
     "textTel": "Tel",
-    "textVersion": "Version"
+    "textVersion": "Version",
+    "textEditor": "Document Editor"
   },
   "Add": {
     "notcriticalErrorTitle": "Warning",
@@ -198,7 +199,8 @@
     "textCancel": "Cancel",
     "textNumberingValue": "Numbering Value",
     "textRefreshEntireTable": "Refresh entire table",
-    "textRefreshPageNumbersOnly": "Refresh page numbers only"
+    "textRefreshPageNumbersOnly": "Refresh page numbers only",
+    "txtWarnUrl": "Clicking this link can be harmful to your device and data.<br>Are you sure you want to continue?"
   },
   "Edit": {
     "notcriticalErrorTitle": "Warning",
@@ -357,7 +359,14 @@
     "textRefreshEntireTable": "Refresh entire table",
     "textRefreshPageNumbersOnly": "Refresh page numbers only",
     "textStyles": "Styles",
-    "textAmountOfLevels": "Amount of Levels"
+    "textAmountOfLevels": "Amount of Levels",
+    "textCreateTextStyle": "Create new text style",
+    "textDone": "Done",
+    "textTitle": "Title",
+    "textEnterTitleNewStyle": "Enter title of a new style",
+    "textNextParagraphStyle": "Next paragraph style",
+    "textSameCreatedNewStyle": "Same as created new style",
+    "textParagraphStyle": "Paragraph Style"
   },
   "Error": {
     "convertationTimeoutText": "Conversion timeout exceeded.",
@@ -505,7 +514,8 @@
       "X Axis": "X Axis XAS",
       "Y Axis": "Y Axis",
       "Your text here": "Your text here",
-      "Zero Divide": "Zero Divide"
+      "Zero Divide": "Zero Divide",
+      "No table of contents entries found.": "There are no headings in the document. Apply a heading style to the text so that it appears in the table of contents."
     },
     "textAnonymous": "Anonymous",
     "textBuyNow": "Visit website",
@@ -657,7 +667,11 @@
     "textFastWV": "Fast Web View",
     "textYes": "Yes",
     "textNo": "No",
-    "textPdfProducer": "PDF Producer"
+    "textPdfProducer": "PDF Producer",
+    "textDirection": "Direction",
+    "textLeftToRight": "Left To Right",
+    "textRightToLeft": "Right To Left",
+    "textRestartApplication": "Please restart the application for the changes to take effect"
   },
   "Toolbar": {
     "dlgLeaveMsgText": "You have unsaved changes. Click 'Stay on this Page' to wait for autosave. Click 'Leave this Page' to discard all the unsaved changes.",

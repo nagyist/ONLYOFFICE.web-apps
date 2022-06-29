@@ -80,6 +80,12 @@ define([
             this._originalFormProps = null;
             this._originalProps = null;
 
+            this._arrWidthRule = [
+                {displayValue: this.textAuto,    value: Asc.CombFormWidthRule.Auto},
+                {displayValue: this.textAtLeast, value: Asc.CombFormWidthRule.AtLeast},
+                {displayValue: this.textExact,   value: Asc.CombFormWidthRule.Exact}
+            ];
+
             this.render();
         },
 
@@ -147,6 +153,24 @@ define([
                 setTimeout(function(){me.txtPlaceholder._input && me.txtPlaceholder._input.select();}, 1);
             });
 
+            this.txtTag = new Common.UI.InputField({
+                el          : $markup.findById('#form-txt-tag'),
+                allowBlank  : true,
+                validateOnChange: false,
+                validateOnBlur: false,
+                style       : 'width: 100%;',
+                value       : '',
+                dataHint    : '1',
+                dataHintDirection: 'left',
+                dataHintOffset: 'small'
+            });
+            this.lockedControls.push(this.txtTag);
+            this.txtTag.on('changed:after', this.onTagChanged.bind(this));
+            this.txtTag.on('inputleave', function(){ me.fireEvent('editcomplete', me);});
+            this.txtTag.cmpEl.on('focus', 'input.form-control', function() {
+                setTimeout(function(){me.txtTag._input && me.txtTag._input.select();}, 1);
+            });
+
             this.textareaHelp = new Common.UI.TextareaField({
                 el          : $markup.findById('#form-txt-help'),
                 style       : 'width: 100%; height: 60px;',
@@ -196,13 +220,26 @@ define([
             this.chComb.on('change', this.onChCombChanged.bind(this));
             this.lockedControls.push(this.chComb);
 
+            this.cmbWidthRule = new Common.UI.ComboBox({
+                el: $markup.findById('#form-combo-width-rule'),
+                cls: 'input-group-nr',
+                menuStyle: 'min-width: 85px;',
+                editable: false,
+                data: this._arrWidthRule,
+                dataHint: '1',
+                dataHintDirection: 'bottom',
+                dataHintOffset: 'big'
+            });
+            this.cmbWidthRule.setValue('');
+            this.cmbWidthRule.on('selected', this.onWidthRuleSelect.bind(this));
+
             this.spnWidth = new Common.UI.MetricSpinner({
                 el: $markup.findById('#form-spin-width'),
                 step: .1,
-                width: 64,
+                width: 85,
                 defaultUnit : "cm",
-                value: 'Auto',
-                allowAuto: true,
+                value: '',
+                allowAuto: false,
                 maxValue: 55.88,
                 minValue: 0.1,
                 dataHint: '1',
@@ -501,6 +538,16 @@ define([
             }
         },
 
+        onTagChanged: function(input, newValue, oldValue, e) {
+            if (this.api && !this._noApply && (newValue!==oldValue)) {
+                var props   = this._originalProps || new AscCommon.CContentControlPr();
+                props.put_Tag(newValue);
+                this.api.asc_SetContentControlProperties(props, this.internalId);
+                if (!e.relatedTarget || (e.relatedTarget.localName != 'input' && e.relatedTarget.localName != 'textarea') || !/form-control/.test(e.relatedTarget.className))
+                    this.fireEvent('editcomplete', this);
+            }
+        },
+
         onHelpChanged: function(input, newValue, oldValue, e) {
             if (this.api && !this._noApply && (newValue!==oldValue)) {
                 var props   = this._originalProps || new AscCommon.CContentControlPr();
@@ -519,6 +566,7 @@ define([
             if (!checked) {
                 this.chComb.setValue(false, true);
                 this.spnWidth.setDisabled(true);
+                this.cmbWidthRule.setDisabled(true);
             }
             if (this.api && !this._noApply) {
                 var props   = this._originalProps || new AscCommon.CContentControlPr();
@@ -548,7 +596,8 @@ define([
                 this.chMaxChars.setValue(true, true);
                 this.spnMaxChars.setDisabled(false || this._state.DisabledControls);
             }
-            this.spnWidth.setDisabled(!checked || this._state.DisabledControls);
+            this.cmbWidthRule.setDisabled(!checked || this._state.Fixed || this._state.DisabledControls);
+            this.spnWidth.setDisabled(!checked || this._state.WidthRule===Asc.CombFormWidthRule.Auto || this._state.DisabledControls);
             if (this.api && !this._noApply) {
                 var props   = this._originalProps || new AscCommon.CContentControlPr();
                 var formTextPr = this._originalTextFormProps || new AscCommon.CSdtTextFormPr();
@@ -574,11 +623,25 @@ define([
                 if (this.spnWidth.getValue()) {
                     var value = this.spnWidth.getNumberValue();
                     formTextPr.put_Width(value<=0 ? 0 : parseInt(Common.Utils.Metric.fnRecalcToMM(value) * 72 * 20 / 25.4 + 0.5));
+                    formTextPr.put_WidthRule(this.cmbWidthRule.getValue());
                 } else
                     formTextPr.put_Width(0);
 
                 props.put_TextFormPr(formTextPr);
                 this.api.asc_SetContentControlProperties(props, this.internalId);
+            }
+        },
+
+        onWidthRuleSelect: function(combo, record) {
+            if (this.api && !this._noApply) {
+                var props   = this._originalProps || new AscCommon.CContentControlPr();
+                var formTextPr = this._originalTextFormProps || new AscCommon.CSdtTextFormPr();
+                formTextPr.put_WidthRule(record.value);
+                if (record.value === Asc.CombFormWidthRule.Auto)
+                    formTextPr.put_Width(this._state.WidthPlaceholder);
+                props.put_TextFormPr(formTextPr);
+                this.api.asc_SetContentControlProperties(props, this.internalId);
+                this.fireEvent('editcomplete', this);
             }
         },
 
@@ -620,6 +683,8 @@ define([
 
         onChFixed: function(field, newValue, oldValue, eOpts){
             if (this.api && !this._noApply) {
+                var props   = this._originalProps || new AscCommon.CContentControlPr();
+                this.cmbWidthRule.setDisabled(!this._state.Comb || field.getValue()=='checked' || this._state.DisabledControls);
                 this.api.asc_SetFixedForm(this.internalId, field.getValue()=='checked');
                 this.fireEvent('editcomplete', this);
              }
@@ -828,6 +893,12 @@ define([
                 if (this._state.placeholder !== val) {
                     this.txtPlaceholder.setValue(val ? val : '');
                     this._state.placeholder = val;
+                }
+
+                val = props.get_Tag();
+                if (this._state.tag !== val) {
+                    this.txtTag.setValue(val ? val : '');
+                    this._state.tag = val;
                 }
 
                 val = props.get_Lock();
@@ -1084,17 +1155,25 @@ define([
                     }
                     this.chAutofit.setDisabled(!this._state.Fixed || this._state.Comb || this._state.DisabledControls);
 
-                    this.spnWidth.setDisabled(!this._state.Comb || this._state.DisabledControls);
-                    val = formTextPr.get_Width();
-                    if ( (val===undefined || this._state.Width===undefined)&&(this._state.Width!==val) || Math.abs(this._state.Width-val)>0.1) {
-                        this.spnWidth.setValue(val!==0 && val!==undefined ? Common.Utils.Metric.fnRecalcFromMM(val * 25.4 / 20 / 72.0) : -1, true);
-                        this._state.Width=val;
+                    this.cmbWidthRule.setDisabled(!this._state.Comb || this._state.Fixed || this._state.DisabledControls);
+                    val = this._state.Fixed ? Asc.CombFormWidthRule.Exact : formTextPr.get_WidthRule();
+                    if ( this._state.WidthRule!==val ) {
+                        this.cmbWidthRule.setValue((val !== null && val !== undefined) ? val : '');
+                        this._state.WidthRule=val;
                     }
 
                     val = this.api.asc_GetTextFormAutoWidth();
                     if ( (this._state.WidthPlaceholder!==val) || Math.abs(this._state.WidthPlaceholder-val)>0.01) {
                         this.spnWidth.setDefaultValue(val!==undefined && val!==null ? Common.Utils.Metric.fnRecalcFromMM((val+1) * 25.4 / 20 / 72.0) : this.spnWidth.getMinValue());
                         this._state.WidthPlaceholder=val;
+                    }
+
+                    this.spnWidth.setDisabled(!this._state.Comb || this._state.WidthRule===Asc.CombFormWidthRule.Auto || this._state.DisabledControls);
+                    val = formTextPr.get_Width();
+                    val = (this._state.WidthRule===Asc.CombFormWidthRule.Auto || val===undefined || val===0) ? this._state.WidthPlaceholder : val;
+                    if ((val===undefined || this._state.Width===undefined)&&(this._state.Width!==val) || Math.abs(this._state.Width-val)>0.1) {
+                        this.spnWidth.setValue(val!==0 && val!==undefined ? Common.Utils.Metric.fnRecalcFromMM(val * 25.4 / 20 / 72.0) : '', true);
+                        this._state.Width=val;
                     }
 
                     val = formTextPr.get_MaxCharacters();
@@ -1127,7 +1206,7 @@ define([
                 }
                 var val = this._state.Width;
                 this.spnWidth && this.spnWidth.setMinValue(Common.Utils.Metric.fnRecalcFromMM(1));
-                this.spnWidth && this.spnWidth.setValue(val!==0 && val!==undefined ? Common.Utils.Metric.fnRecalcFromMM(val * 25.4 / 20 / 72.0) : -1, true);
+                this.spnWidth && this.spnWidth.setValue(val!==0 && val!==undefined ? Common.Utils.Metric.fnRecalcFromMM(val * 25.4 / 20 / 72.0) : '', true);
             }
         },
 
@@ -1196,7 +1275,8 @@ define([
                 });
             }
             this.spnMaxChars.setDisabled(this.chMaxChars.getValue()!=='checked' || this._state.DisabledControls);
-            this.spnWidth.setDisabled(!this._state.Comb || this._state.DisabledControls);
+            this.cmbWidthRule.setDisabled(!this._state.Comb || this._state.Fixed || this._state.DisabledControls);
+            this.spnWidth.setDisabled(!this._state.Comb || this._state.WidthRule===Asc.CombFormWidthRule.Auto || this._state.DisabledControls);
             this.chMulti.setDisabled(!this._state.Fixed || this._state.Comb || this._state.DisabledControls);
             this.chAutofit.setDisabled(!this._state.Fixed || this._state.Comb || this._state.DisabledControls);
             this.chAspect.setDisabled(this._state.scaleFlag === Asc.c_oAscPictureFormScaleFlag.Never || this._state.DisabledControls);
@@ -1341,7 +1421,11 @@ define([
         textTooBig: 'Image is Too Big',
         textTooSmall: 'Image is Too Small',
         textScale: 'When to scale',
-        textBackgroundColor: 'Background Color'
+        textBackgroundColor: 'Background Color',
+        textTag: 'Tag',
+        textAuto: 'Auto',
+        textAtLeast: 'At least',
+        textExact: 'Exactly'
 
     }, DE.Views.FormSettings || {}));
 });

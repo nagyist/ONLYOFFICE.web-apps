@@ -4,6 +4,7 @@
   "common.view.modals.txtHeight": "Alçada",
   "common.view.modals.txtShare": "Comparteix l'enllaç",
   "common.view.modals.txtWidth": "Amplada",
+  "common.view.SearchBar.textFind": "Cerca",
   "PE.ApplicationController.convertationErrorText": "No s'ha pogut convertir.",
   "PE.ApplicationController.convertationTimeoutText": "S'ha superat el temps de conversió.",
   "PE.ApplicationController.criticalErrorTitle": "Error",
@@ -34,5 +35,6 @@
   "PE.ApplicationView.txtFileLocation": "Obre la ubicació del fitxer",
   "PE.ApplicationView.txtFullScreen": "Pantalla completa",
   "PE.ApplicationView.txtPrint": "Imprimeix",
+  "PE.ApplicationView.txtSearch": "Cerca",
   "PE.ApplicationView.txtShare": "Comparteix"
 }

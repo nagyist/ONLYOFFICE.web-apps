@@ -4,9 +4,10 @@
     "textAddress": "アドレス",
     "textBack": "戻る",
     "textEmail": "メール",
-    "textPoweredBy": "Powered by",
+    "textPoweredBy": "によって提供されています",
     "textTel": "電話",
-    "textVersion": "バージョン"
+    "textVersion": "バージョン",
+    "textEditor": "Spreadsheet Editor"
   },
   "Common": {
     "Collaboration": {
@@ -62,7 +63,9 @@
     "notcriticalErrorTitle": " 警告",
     "textCopyCutPasteActions": "コピー,切り取り,貼り付けの操作",
     "textDoNotShowAgain": "再度表示しない",
-    "warnMergeLostData": "マージされたセルに左上のセルからのデータのみが残ります。<br>続行してもよろしいです？"
+    "warnMergeLostData": "マージされたセルに左上のセルからのデータのみが残ります。<br>続行してもよろしいです？",
+    "textOk": "Ok",
+    "txtWarnUrl": "Clicking this link can be harmful to your device and data.<br>Are you sure you want to continue?"
   },
   "Controller": {
     "Main": {
@@ -98,7 +101,7 @@
         "txtPage": "ページ",
         "txtPageOf": "1%/2%ページ",
         "txtPages": "ページ",
-        "txtPreparedBy": "Prepared by",
+        "txtPreparedBy": "作成者：",
         "txtPrintArea": "印刷範囲",
         "txtQuarter": "四半期",
         "txtQuarters": "四半期",
@@ -151,6 +154,7 @@
       "textRemember": "選択を覚える",
       "textReplaceSkipped": "置換が完了しました。{0}つスキップされました。",
       "textReplaceSuccess": "検索が完了しました。{0}つが置換されました。",
+      "textRequestMacros": "マクロがURLに対してリクエストを行います。%1へのリクエストを許可しますか？",
       "textYes": "Yes",
       "titleServerVersion": "編集者が更新された",
       "titleUpdateVersion": "バージョンが変更されました",
@@ -160,8 +164,7 @@
       "warnLicenseUsersExceeded": "％1エディターのユーザー制限に達しました。 詳細についてはアドミニストレータを連絡してください。",
       "warnNoLicense": "％１エディター　時接続数の制限に達しました。この文書が見るだけのために開かれる。個人的なアップグレード条件については、％1営業チームを連絡してください。",
       "warnNoLicenseUsers": "％1エディターのユーザー制限に達しました。 個人的なアップグレード条件については、％1営業チームを連絡してください。",
-      "warnProcessRightsChange": "ファイルを編集する権限がありません！",
-      "textRequestMacros": "A macro makes a request to URL. Do you want to allow the request to the %1?"
+      "warnProcessRightsChange": "ファイルを編集する権限がありません！"
     }
   },
   "Error": {
@@ -204,7 +207,7 @@
     "errorInvalidRef": "選択のための正しい名前、または移動の正しい参照を入力してください。",
     "errorKeyEncrypt": "不明なキーの記述子",
     "errorKeyExpire": "キーの記述子の有効期間が満期した",
-    "errorLoadingFont": "フォントがダウンロードしませんでした。文書のサーバのアドミ二ストレータを連絡してください。",
+    "errorLoadingFont": "フォントがダウンロードしませんでした。<br>文書のサーバのアドミ二ストレータを連絡してください。",
     "errorLockedAll": "シートは他のユーザーによってロックされているので、操作を実行することができません。",
     "errorLockedCellPivot": "ピボット表内のデータを変更することはできません。",
     "errorLockedWorksheetRename": "他のユーザーによって名前が変更されているのでシートの名前を変更することはできません。",
@@ -299,9 +302,9 @@
     "textRenameSheet": "このシートの名前を変更する",
     "textSheet": "シート",
     "textSheetName": "シートの名",
+    "textTabColor": "シート見出しの色",
     "textUnhide": "表示する",
-    "textWarnDeleteSheet": "ワークシートはデータがあるそうです。操作を続けてもよろしいですか？",
-    "textTabColor": "Tab Color"
+    "textWarnDeleteSheet": "ワークシートはデータがあるそうです。操作を続けてもよろしいですか？"
   },
   "Toolbar": {
     "dlgLeaveMsgText": "保存されていない変更があります。自動保存を待つように「このページから移動しない」をクリックしてください。保存されていない変更を破棄ように「このページから移動する」をクリックしてください。",
@@ -400,7 +403,7 @@
       "textBottomBorder": "最下部の境界線",
       "textBringToForeground": "前景に動かす",
       "textCell": "セル",
-      "textCellStyles": "セルのスタイル",
+      "textCellStyle": "セルのスタイル",
       "textCenter": "中央揃え",
       "textChart": "グラフ",
       "textChartTitle": "グラフの名",
@@ -581,6 +584,7 @@
       "textCustomSize": "ユーザー設定サイズ",
       "textDarkTheme": "ダークテーマ",
       "textDelimeter": "デリミタ",
+      "textDirection": "方向",
       "textDisableAll": "全てを無効にする",
       "textDisableAllMacrosWithNotification": "警告を表示して全てのマクロを無効にする",
       "textDisableAllMacrosWithoutNotification": "警告を表示してないすべてのマクロを無効にする",
@@ -592,6 +596,7 @@
       "textEnableAllMacrosWithoutNotification": "警告を表示してないすべてのマクロを有効にする",
       "textEncoding": "エンコード",
       "textExample": "例文",
+      "textFeedback": "フィードバック＆サポート",
       "textFind": "検索する",
       "textFindAndReplace": "検索と置換",
       "textFindAndReplaceAll": "全てを 検索して置換する",
@@ -607,6 +612,7 @@
       "textLastModified": "最後の変更",
       "textLastModifiedBy": "最後の変更の作成者",
       "textLeft": "左",
+      "textLeftToRight": "左から右へ",
       "textLocation": "位置",
       "textLookIn": "検索の範囲",
       "textMacrosSettings": "マクロの設定",
@@ -620,14 +626,16 @@
       "textOwner": "作成者",
       "textPoint": "ポイント",
       "textPortrait": "縦長の向き",
-      "textPoweredBy": "Powered by",
+      "textPoweredBy": "によって提供されています",
       "textPrint": "印刷",
       "textR1C1Style": "R1C1参照形式",
       "textRegionalSettings": "地域と言語のオプション",
       "textReplace": "置換する",
       "textReplaceAll": "全てを置換する",
       "textResolvedComments": "解決されたコメント",
+      "textRestartApplication": "変更を有効にするには、アプリケーションを再起動してください",
       "textRight": "右",
+      "textRightToLeft": "右から左に",
       "textSearch": "検索",
       "textSearchBy": "検索",
       "textSearchIn": "検索する場所",
@@ -680,8 +688,7 @@
       "txtSemicolon": "セミコロン",
       "txtSpace": "スペース",
       "txtTab": "タブ",
-      "warnDownloadAs": "この形式で保存する続けば、テクスト除いて全てが失います。続けてもよろしいですか？",
-      "textFeedback": "Feedback & Support"
+      "warnDownloadAs": "この形式で保存する続けば、テクスト除いて全てが失います。続けてもよろしいですか？"
     }
   }
 }

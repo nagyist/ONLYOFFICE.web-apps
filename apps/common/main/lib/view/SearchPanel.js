@@ -359,10 +359,12 @@ define([
             if (count > 300) {
                 text = this.textTooManyResults;
             } else {
-                text = current === 'no-results' ? this.textNoSearchResults : (!count ? this.textNoMatches : Common.Utils.String.format(this.textSearchResults, current + 1, count));
+                text = current === 'no-results' ? this.textNoSearchResults :
+                    (current === 'stop' ? this.textSearchHasStopped :
+                    (!count ? this.textNoMatches : Common.Utils.String.format(this.textSearchResults, current + 1, count)));
             }
             this.$reaultsNumber.text(text);
-            this.disableReplaceButtons(!count);
+            !window.SSE && this.disableReplaceButtons(!count);
         },
 
         onClickClosePanel: function() {
@@ -594,7 +596,8 @@ define([
         textName: 'Name',
         textCell: 'Cell',
         textValue: 'Value',
-        textFormula: 'Formula'
+        textFormula: 'Formula',
+        textSearchHasStopped: 'Search has stopped'
 
     }, Common.Views.SearchPanel || {}));
 });

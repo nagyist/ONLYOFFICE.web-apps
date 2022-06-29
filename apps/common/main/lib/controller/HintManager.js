@@ -134,7 +134,7 @@ Common.UI.HintManager = new(function() {
             return;
         }
         if (_isEditDiagram) {
-            _currentSection = [$(window.parent.document).find('.advanced-settings-dlg')[0], window.document];
+            _currentSection = [$(window.parent.document).find('.advanced-settings-dlg:visible')[0], window.document];
         } else if ($('#file-menu-panel').is(':visible')) {
             _currentSection = $('#file-menu-panel');
         } else {
@@ -568,7 +568,7 @@ Common.UI.HintManager = new(function() {
                                 if (curr.prop('id') === 'btn-goback' || curr.closest('.btn-slot').prop('id') === 'slot-btn-options' ||
                                     curr.closest('.btn-slot').prop('id') === 'slot-btn-mode' || curr.prop('id') === 'btn-favorite' || curr.parent().prop('id') === 'tlb-box-users' ||
                                     curr.prop('id') === 'left-btn-thumbs' || curr.hasClass('scroll') || curr.prop('id') === 'left-btn-about' ||
-                                    curr.prop('id') === 'left-btn-support') {
+                                    curr.prop('id') === 'left-btn-support' || curr.closest('.btn-slot').prop('id') === 'slot-btn-search') {
                                     _resetToDefault();
                                     return;
                                 }

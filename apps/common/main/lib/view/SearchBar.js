@@ -63,8 +63,8 @@ define([
                 '<div class="box">',
                     '<input type="text" id="search-bar-text" class="input-field form-control" maxlength="255" placeholder="'+this.textFind+'" autocomplete="off">',
                     '<div class="tools">',
-                        '<div id="search-bar-back"></div>',
-                        '<div id="search-bar-next"></div>',
+                        '<div id="search-bar-back" tabindex="0"></div>',
+                        '<div id="search-bar-next" tabindex="0"></div>',
                         this.options.showOpenPanel ? '<div id="search-bar-open-panel"></div>' : '',
                         '<div id="search-bar-close"></div>',
                     '</div>',
@@ -73,6 +73,11 @@ define([
 
             this.options.tpl = _.template(this.template)(this.options);
             this.iconType = this.options.iconType;
+
+            this.wrapEvents = {
+                keydown: _.bind(this.onKeydown, this),
+                mousedown: _.bind(this.onMousedown, this),
+            };
 
             Common.UI.Window.prototype.initialize.call(this, this.options);
 
@@ -97,7 +102,7 @@ define([
                 iconCls: this.iconType === 'svg' ? 'svg-icon search-arrow-up' : 'toolbar__icon btn-arrow-up',
                 hint: this.tipPreviousResult
             });
-            this.btnBack.on('click', _.bind(this.onBtnNextClick, this, 'back'));
+            this.btnBack.on('click', _.bind(this.onBtnNextClick, this, this.btnBack, 'back'));
 
             this.btnNext = new Common.UI.Button({
                 parentEl: $('#search-bar-next'),
@@ -105,7 +110,7 @@ define([
                 iconCls: this.iconType === 'svg' ? 'svg-icon search-arrow-down' : 'toolbar__icon btn-arrow-down',
                 hint: this.tipNextResult
             });
-            this.btnNext.on('click', _.bind(this.onBtnNextClick, this, 'next'));
+            this.btnNext.on('click', _.bind(this.onBtnNextClick, this, this.btnNext, 'next'));
 
             if (this.options.showOpenPanel) {
                 this.btnOpenPanel = new Common.UI.Button({
@@ -175,8 +180,36 @@ define([
             this.$window.css({left: left, top: top});
         },
 
-        onBtnNextClick: function(action) {
+        onBtnNextClick: function(btn, action) {
             this.fireEvent('search:'+action, [this.inputSearch.val(), false]);
+
+            if (!this.listenKeydown) {
+                this.listenKeydown = true;
+                $(document).on('keydown', this.wrapEvents.keydown);
+                $(document).on('mousedown', this.wrapEvents.mousedown);
+                $('#editor_sdk').on('click', this.wrapEvents.mousedown);
+            }
+            setTimeout(_.bind(function () {
+                btn.$el.focus();
+            }, this), 10);
+        },
+
+        onKeydown: function (e) {
+            var elFocus = this.getChild().find(':focus'),
+                action = elFocus.prop('id') === 'search-bar-next' ? 'next' : 'back';
+            elFocus.find('button')[e.keyCode === Common.UI.Keys.RETURN ? 'addClass' : 'removeClass']('focused');
+            this.fireEvent('search:keydown-next', [action, this.inputSearch.val(), e]);
+            if (e.keyCode !== Common.UI.Keys.RETURN) {
+                this.onMousedown();
+            }
+        },
+
+        onMousedown: function () {
+            this.getChild().find('.focused').removeClass('focused');
+            $(document).off('keydown', this.wrapEvents.keydown);
+            $(document).off('mousedown', this.wrapEvents.mousedown);
+            $('#editor_sdk').off('click', this.wrapEvents.mousedown);
+            this.listenKeydown = false;
         },
 
         onOpenPanel: function () {

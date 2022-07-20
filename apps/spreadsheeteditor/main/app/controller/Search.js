@@ -60,7 +60,8 @@ define([
                     'search:input': _.bind(this.onInputSearchChange, this),
                     'search:keydown': _.bind(this.onSearchNext, this, 'keydown'),
                     'show': _.bind(this.onSelectSearchingResults, this, true),
-                    'hide': _.bind(this.onSelectSearchingResults, this, false)
+                    'hide': _.bind(this.onSelectSearchingResults, this, false),
+                    'search:keydown-next': _.bind(this.onKeydownNext, this)
                 },
                 'Common.Views.SearchPanel': {
                     'search:back': _.bind(this.onSearchNext, this, 'back'),
@@ -71,7 +72,8 @@ define([
                     'search:options': _.bind(this.onChangeSearchOption, this),
                     'search:keydown': _.bind(this.onSearchNext, this, 'keydown'),
                     'show': _.bind(this.onShowPanel, this),
-                    'hide': _.bind(this.onHidePanel, this)
+                    'hide': _.bind(this.onHidePanel, this),
+                    'search:keydown-next': _.bind(this.onKeydownNext, this)
                 },
                 'LeftMenu': { // TO DO
                     'search:aftershow': _.bind(this.onShowAfterSearch, this)
@@ -209,7 +211,14 @@ define([
                         this.api.asc_StartTextAroundSearch();
                     }
                 }
+                if (type !== 'keydown' && e.keyCode !== Common.UI.Keys.RETURN) {
+                    this.api.asc_enableKeyEvents(false);
+                }
             }
+        },
+
+        onKeydownNext: function (type, text, e) {
+            e.keyCode === Common.UI.Keys.RETURN ? this.onSearchNext(type, text, e) : this.api.asc_enableKeyEvents(true);
         },
 
         onInputSearchChange: function (text) {

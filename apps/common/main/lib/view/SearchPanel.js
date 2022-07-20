@@ -53,6 +53,11 @@ define([
 
             this.mode = false;
 
+            this.wrapEvents = {
+                keydown: _.bind(this.onKeydown, this),
+                mousedown: _.bind(this.onMousedown, this),
+            };
+
             window.SSE && (this.extendedOptions = Common.localStorage.getBool('sse-search-options-extended', true));
         },
 
@@ -105,7 +110,7 @@ define([
                     dataHint: '1',
                     dataHintDirection: 'bottom'
                 });
-                this.btnBack.on('click', _.bind(this.onBtnNextClick, this, 'back'));
+                this.btnBack.on('click', _.bind(this.onBtnNextClick, this, this.btnBack, 'back'));
 
                 this.btnNext = new Common.UI.Button({
                     parentEl: $('#search-adv-next'),
@@ -115,7 +120,7 @@ define([
                     dataHint: '1',
                     dataHintDirection: 'bottom'
                 });
-                this.btnNext.on('click', _.bind(this.onBtnNextClick, this, 'next'));
+                this.btnNext.on('click', _.bind(this.onBtnNextClick, this, this.btnNext, 'next'));
 
                 this.btnReplace = new Common.UI.Button({
                     el: $('#search-adv-replace')
@@ -346,8 +351,36 @@ define([
             this.fireEvent('hide', this );
         },
 
-        onBtnNextClick: function (action) {
+        onBtnNextClick: function (btn, action) {
             this.fireEvent('search:'+action, [this.inputText.getValue(), true]);
+
+            if (!this.listenKeydown) {
+                this.listenKeydown = true;
+                $(document).on('keydown', this.wrapEvents.keydown);
+                $(document).on('mousedown', this.wrapEvents.mousedown);
+                $('#editor_sdk').on('click', this.wrapEvents.mousedown);
+            }
+            setTimeout(_.bind(function () {
+                btn.$el.focus();
+            }, this), 10);
+        },
+
+        onKeydown: function (e) {
+            var elFocus = $(':focus'),
+                action = elFocus.prop('id') === 'search-adv-next' ? 'next' : 'back';
+            elFocus.find('button')[e.keyCode === Common.UI.Keys.RETURN ? 'addClass' : 'removeClass']('focused');
+            this.fireEvent('search:keydown-next', [action, this.inputText.getValue(), e]);
+            if (e.keyCode !== Common.UI.Keys.RETURN) {
+                this.onMousedown();
+            }
+        },
+
+        onMousedown: function () {
+            this.$el.find('.focused').removeClass('focused');
+            $(document).off('keydown', this.wrapEvents.keydown);
+            $(document).off('mousedown', this.wrapEvents.mousedown);
+            $('#editor_sdk').off('click', this.wrapEvents.mousedown);
+            this.listenKeydown = false;
         },
 
         onReplaceClick: function (action) {

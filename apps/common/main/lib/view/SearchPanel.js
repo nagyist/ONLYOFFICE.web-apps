@@ -369,13 +369,15 @@ define([
             var elFocus = $(':focus'),
                 action = elFocus.prop('id') === 'search-adv-next' ? 'next' : 'back';
             elFocus.find('button')[e.keyCode === Common.UI.Keys.RETURN ? 'addClass' : 'removeClass']('focused');
-            this.fireEvent('search:keydown-next', [action, this.inputText.getValue(), e]);
-            if (e.keyCode !== Common.UI.Keys.RETURN) {
+            if (e.keyCode === Common.UI.Keys.RETURN) {
+                this.fireEvent('search:keydown-next', [action, this.inputText.getValue(), e]);
+            } else {
                 this.onMousedown();
             }
         },
 
         onMousedown: function () {
+            this.fireEvent('search:enable-key');
             this.$el.find('.focused').removeClass('focused');
             $(document).off('keydown', this.wrapEvents.keydown);
             $(document).off('mousedown', this.wrapEvents.mousedown);

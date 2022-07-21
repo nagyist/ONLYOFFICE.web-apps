@@ -198,13 +198,15 @@ define([
             var elFocus = this.getChild().find(':focus'),
                 action = elFocus.prop('id') === 'search-bar-next' ? 'next' : 'back';
             elFocus.find('button')[e.keyCode === Common.UI.Keys.RETURN ? 'addClass' : 'removeClass']('focused');
-            this.fireEvent('search:keydown-next', [action, this.inputSearch.val(), e]);
-            if (e.keyCode !== Common.UI.Keys.RETURN) {
+            if (e.keyCode === Common.UI.Keys.RETURN) {
+                this.fireEvent('search:keydown-next', [action, this.inputSearch.val(), e]);
+            } else {
                 this.onMousedown();
             }
         },
 
         onMousedown: function () {
+            this.fireEvent('search:enable-key');
             this.getChild().find('.focused').removeClass('focused');
             $(document).off('keydown', this.wrapEvents.keydown);
             $(document).off('mousedown', this.wrapEvents.mousedown);

@@ -99,8 +99,9 @@
                     margin-left: 7px;
                 }
                 .focused:not(.disabled) {
-                    background-color: @highlight-button-hover-ie;
-                    background-color: @highlight-button-hover;
+                    .border-radius(@border-radius-small);
+                    box-shadow: inset 0 0 0 @scaled-one-px-value-ie @border-control-focus-ie;
+                    box-shadow: inset 0 0 0 @scaled-one-px-value @border-control-focus;
                 }
             }
         }
@@ -182,8 +183,9 @@
                 display: inline-block;
             }
             .focused:not(.disabled) {
-                background-color: @highlight-button-hover-ie;
-                background-color: @highlight-button-hover;
+                .border-radius(@border-radius-small);
+                box-shadow: inset 0 0 0 @scaled-one-px-value-ie @border-control-focus-ie;
+                box-shadow: inset 0 0 0 @scaled-one-px-value @border-control-focus;
             }
         }
     }

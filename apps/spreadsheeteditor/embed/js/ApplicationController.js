@@ -311,6 +311,14 @@ SSE.ApplicationController = new(function(){
                 common.controller.SearchBar.show();
             });
 
+        var shortcuts = {
+            'command+f,ctrl+f': function() {
+                common.controller.SearchBar.show();
+                return false;
+            }
+        };
+        common.utils.shortcuts(shortcuts);
+
         $('#id-btn-zoom-in').on('click', function () {
             if (api){
                 var f = Math.floor(api.asc_getZoom() * 10)/10;

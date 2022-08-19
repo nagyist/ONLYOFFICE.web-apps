@@ -375,6 +375,14 @@ PE.ApplicationController = new(function(){
                 common.controller.SearchBar.show();
             });
 
+        /*var shortcuts = {
+            'command+f,ctrl+f': function() {
+                common.controller.SearchBar.show();
+                return false;
+            }
+        };
+        common.utils.shortcuts(shortcuts);*/
+
         var $pagenum = $('#page-number');
         $pagenum.on({
             'keyup': function(e){

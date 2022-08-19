@@ -525,6 +525,14 @@ DE.ApplicationController = new(function(){
                 common.controller.SearchBar.show();
             });
 
+        var shortcuts = {
+            'command+f,ctrl+f': function() {
+                common.controller.SearchBar.show();
+                return false;
+            }
+        };
+        common.utils.shortcuts(shortcuts);
+
         $('#id-btn-zoom-in').on('click', api.zoomIn.bind(this));
         $('#id-btn-zoom-out').on('click', api.zoomOut.bind(this));
 

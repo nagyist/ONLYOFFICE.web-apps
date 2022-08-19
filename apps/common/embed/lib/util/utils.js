@@ -106,6 +106,21 @@
                     }
                 }
             },
+            shortcuts: function (options) {
+                var shortcuts = options;
+                require([
+                    'common/main/lib/core/keymaster'
+                ], function() {
+                    window.key.filter = function() {
+                        return true;
+                    };
+                    var shortcut, callback;
+                    for (shortcut in shortcuts) {
+                        callback = shortcuts[shortcut];
+                        window.key(shortcut, 'all', callback);
+                    }
+                });
+            },
 
             isMac : isMac
         };

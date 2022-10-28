@@ -1,7 +1,6 @@
-
 import React, { Component } from 'react';
 import { CSSTransition } from 'react-transition-group';
-import { f7, Link, Fab, Icon, FabButtons, FabButton, Page, View, Navbar, Subnavbar } from 'framework7-react';
+import { f7, Fab, Icon, Page, View, Navbar, Subnavbar } from 'framework7-react';
 import { observer, inject } from "mobx-react";
 import { withTranslation } from 'react-i18next';
 import EditOptions from '../view/edit/Edit';
@@ -29,7 +28,10 @@ class MainPage extends Component {
             navigationVisible: false,
             addLinkSettingsVisible: false,
             editLinkSettingsVisible: false,
-            snackbarVisible: false
+            snackbarVisible: false,
+            countPages: 0,
+            currentPageNumber: 0,
+            isCurrentPageChanged: false
         };
     }
 
@@ -119,6 +121,24 @@ class MainPage extends Component {
         api.asc_removeRestriction(Asc.c_oAscRestrictionType.View)
         api.asc_addRestriction(Asc.c_oAscRestrictionType.None);
     };
+
+    componentDidMount() {
+        Common.Notifications.on('engineCreated', api => {
+            api.asc_registerCallback('asc_onCurrentPage', number => {
+                if(number !== this.state.currentPageNumber) {
+                    this.setState({
+                        isCurrentPageChanged: true,
+                        currentPageNumber: number
+                    })
+                }
+            });
+            api.asc_registerCallback('asc_onCountPages', count => {
+                this.setState({
+                    countPages: count
+                })
+            });
+        });
+    }
 
     render() {
         const { t } = this.props;
@@ -235,7 +255,26 @@ class MainPage extends Component {
                         unmountOnExit
                     >
                         <Snackbar
-                            text={isMobileView ? t("Toolbar.textSwitchedMobileView") : t("Toolbar.textSwitchedStandardView")}/>
+                            text={isMobileView ? t("Toolbar.textSwitchedMobileView") : t("Toolbar.textSwitchedStandardView")} />
+                    </CSSTransition>
+                }
+                {
+                    <CSSTransition
+                        in={this.state.isCurrentPageChanged}
+                        timeout={500}
+                        classNames="snackbar"
+                        mountOnEnter
+                        unmountOnExit
+                        onEntered={(node, isAppearing) => {
+                            if(!isAppearing) {
+                               this.setState({
+                                   isCurrentPageChanged: false
+                               });
+                            }
+                        }}
+                    >
+                        <Snackbar
+                            text={`${t("Settings.textPage")} ${this.state.currentPageNumber + 1} ${t("Settings.textOf")} ${this.state.countPages}`} />
                     </CSSTransition>
                 }
                 {isViewer && !disabledSettings && !disabledControls && !isDisconnected && isAvailableExt && isEdit &&

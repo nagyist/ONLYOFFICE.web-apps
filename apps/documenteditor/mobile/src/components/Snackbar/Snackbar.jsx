@@ -4,7 +4,7 @@ const Snackbar = props => {
     return (
         <div className="snackbar">
             <div className="snackbar__content">
-                <p className="snackbar__text">{props.text}</p>
+                <span className="snackbar__text">{props.text}</span>
             </div>
         </div>
     )

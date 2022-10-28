@@ -632,6 +632,8 @@
     "textOrientation": "Orientation",
     "textOwner": "Owner",
     "textPages": "Pages",
+    "textPage": "Page",
+    "textOf": "of",
     "textPageSize": "Page Size",
     "textParagraphs": "Paragraphs",
     "textPdfProducer": "PDF Producer",

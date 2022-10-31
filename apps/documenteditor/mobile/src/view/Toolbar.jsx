@@ -48,10 +48,8 @@ const ToolbarView = props => {
                 })}
                 {(isViewer || !Device.phone) && isAvailableExt && !props.disabledControls && <Link icon={isMobileView ? 'icon-standard-view' : 'icon-mobile-view'} href={false} onClick={async e => {
                     await props.changeMobileView();
-                    await props.openOptions('snackbar');
-                    setTimeout(() => {
-                        props.closeOptions('snackbar');
-                    },  1500);
+                    await props.closeOptions('change-page');
+                    await props.openOptions('change-mode');
                 }}></Link>}
                 {(props.showEditDocument && !isViewer) &&
                     <Link className={props.disabledControls ? 'disabled' : ''} icon='icon-edit' href={false} onClick={props.onEditDocument}></Link>

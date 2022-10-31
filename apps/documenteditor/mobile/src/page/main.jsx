@@ -28,10 +28,10 @@ class MainPage extends Component {
             navigationVisible: false,
             addLinkSettingsVisible: false,
             editLinkSettingsVisible: false,
-            snackbarVisible: false,
+            isModeChanged: false,
+            isCurrentPageChanged: false,
             countPages: 0,
-            currentPageNumber: 0,
-            isCurrentPageChanged: false
+            currentPageNumber: 0
         };
     }
 
@@ -63,9 +63,9 @@ class MainPage extends Component {
             } else if( opts === 'edit-link') {
                 this.state.editLinkSettingsVisible && (opened = true);
                 newState.editLinkSettingsVisible = true;
-            } else if( opts === 'snackbar') {
-                this.state.snackbarVisible && (opened = true);
-                newState.snackbarVisible = true;
+            } else if( opts === 'change-mode') {
+                this.state.isModeChanged && (opened = true);
+                newState.isModeChanged = true;
             }
 
             for (let key in this.state) {
@@ -89,22 +89,24 @@ class MainPage extends Component {
     handleOptionsViewClosed = opts => {
         setTimeout(() => {
             this.setState(state => {
-                if ( opts == 'edit' )
+                if ( opts === 'edit' )
                     return {editOptionsVisible: false};
-                else if ( opts == 'add' )
+                else if ( opts === 'add' )
                     return {addOptionsVisible: false, addShowOptions: null};
-                else if ( opts == 'settings' )
+                else if ( opts === 'settings' )
                     return {settingsVisible: false};
-                else if ( opts == 'coauth' )
+                else if ( opts === 'coauth' )
                     return {collaborationVisible: false};
-                else if( opts == 'navigation')
+                else if( opts === 'navigation')
                     return {navigationVisible: false};
                 else if ( opts === 'add-link') 
                     return {addLinkSettingsVisible: false};
                 else if( opts === 'edit-link') 
                     return {editLinkSettingsVisible: false};
-                else if( opts == 'snackbar')
-                    return {snackbarVisible: false}
+                else if( opts === 'change-mode')
+                    return {isModeChanged: false}
+                else if( opts === 'change-page')
+                    return {isCurrentPageChanged: false}
             });
             if ((opts === 'edit' || opts === 'coauth') && Device.phone) {
                 f7.navbar.show('.main-navbar');
@@ -132,11 +134,11 @@ class MainPage extends Component {
                     })
                 }
             });
-            api.asc_registerCallback('asc_onCountPages', count => {
-                this.setState({
-                    countPages: count
-                })
-            });
+            // api.asc_registerCallback('asc_onCountPages', count => {
+            //     this.setState({
+            //         countPages: count
+            //     })
+            // });
         });
     }
 
@@ -215,7 +217,7 @@ class MainPage extends Component {
                 {/* {
                   Device.phone ? null : <SearchSettings />
               } */}
-                <SearchSettings useSuspense={false}/>
+                <SearchSettings useSuspense={false} />
                 {
                     !this.state.editOptionsVisible ? null :
                         <EditOptions onclosed={this.handleOptionsViewClosed.bind(this, 'edit')}/>
@@ -248,11 +250,18 @@ class MainPage extends Component {
                 }
                 {
                     <CSSTransition
-                        in={this.state.snackbarVisible}
-                        timeout={500}
+                        in={this.state.isModeChanged}
+                        timeout={1500}
                         classNames="snackbar"
                         mountOnEnter
                         unmountOnExit
+                        onEntered={(node, isAppearing) => {
+                            if(!isAppearing) {
+                                this.setState({
+                                    isModeChanged: false
+                                });
+                            }
+                        }}
                     >
                         <Snackbar
                             text={isMobileView ? t("Toolbar.textSwitchedMobileView") : t("Toolbar.textSwitchedStandardView")} />
@@ -261,7 +270,7 @@ class MainPage extends Component {
                 {
                     <CSSTransition
                         in={this.state.isCurrentPageChanged}
-                        timeout={500}
+                        timeout={1500}
                         classNames="snackbar"
                         mountOnEnter
                         unmountOnExit

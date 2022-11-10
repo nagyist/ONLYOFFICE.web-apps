@@ -1973,7 +1973,7 @@ define([    'text!documenteditor/main/app/template/TableSettingsAdvanced.templat
             if (tableborder===undefined) {
                 this._UpdateBordersNoSpacing_();
 
-                if (this._allTable) {
+                /*if (this._allTable) {
                     updateBorders = this.CellBorders;
                     this.ChangedCellBorders = null;
                     this._UpdateBorderStyle(updateBorders.get_Left(),    (cellborder.indexOf('l') > -1));
@@ -1982,7 +1982,7 @@ define([    'text!documenteditor/main/app/template/TableSettingsAdvanced.templat
                     this._UpdateBorderStyle(updateBorders.get_Bottom(),    (cellborder.indexOf('b') > -1));
                     this._UpdateBorderStyle(updateBorders.get_InsideV(),    (cellborder.indexOf('c') > -1));
                     this._UpdateBorderStyle(updateBorders.get_InsideH(),    (cellborder.indexOf('m') > -1));
-                }
+                }*/
                 return;
             }
 

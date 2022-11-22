@@ -60,7 +60,7 @@ define([
                         '<% if (this.changeSaturation) { %>'+
                             '<div class="cnt-root">'+
                                 '<div class="cnt-sat img-colorpicker">'+
-                                    '<div class="cnt-sat-arrow img-colorpicker"></div>'+
+                                    '<div class="cnt-sat-arrow"></div>'+
                                 '</div>'+
                             '</div>'+
                         '<% } %>'+

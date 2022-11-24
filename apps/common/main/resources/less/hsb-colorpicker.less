@@ -86,9 +86,11 @@
             content: '';
             position: absolute;
             height: 0;
-
             display: inline-block;
             border-style: solid;
+            margin-left: -8px;
+            top: 50%;
+            left: 50%;
         }
         &:before{
             width: 16px;
@@ -97,8 +99,7 @@
             box-shadow: -2px 0px 0px 0px white, 2px 0px 0px 0px #fff;
             border-radius: @scaled-one-px-value-ie;
             border-radius: @scaled-one-px-value;
-            top: 0px;
-            left: 2px;
+            margin-top: -6px;
 
         }
         &:after{
@@ -106,11 +107,7 @@
             border-width: 5px 4.5px;
             border-color: transparent black transparent #000;
             box-shadow: -1px 0px 0px 0px black, 1px 0px 0px 0px #000;
-            position: absolute;
-            top:  @scaled-one-px-value-ie;
-            top:  @scaled-one-px-value;
-            left: 2px;
-
+            margin-top: -5px;
         }
     }
 

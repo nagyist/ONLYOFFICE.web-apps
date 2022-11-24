@@ -42,7 +42,7 @@
         display: inline-block;
         width: 10px;
         height: 196px;
-        margin: 0 8px;
+        margin: 0 8px 0 10px;
     }
 
     .cnt-sat {
@@ -51,7 +51,7 @@
         position: relative;
         border: @scaled-one-px-value-ie solid @border-regular-control-ie;
         border: @scaled-one-px-value solid @border-regular-control;
-        background-position: -195px 0;
+        background-position: -196px 0;
     }
 
     .cnt-hb-arrow {
@@ -81,7 +81,7 @@
         margin-left: -4px;
         margin-left: calc(-3px - @scaled-one-px-value);
         position: absolute;
-        @minus-px: calc(-1px / @pixel-ratio-factor);
+        overflow: hidden;
         &:before,&:after{
             content: '';
             position: absolute;
@@ -92,35 +92,26 @@
         }
         &:before{
             width: 16px;
-            width: calc(15px + @scaled-one-px-value);
-            border-width: 6px 6px 6px 6px;
-            border-width: 6px calc(6px + @scaled-one-px-value) 6px calc(6px + @scaled-one-px-value);
-            border-color: transparent white transparent white;
-            box-shadow: -2px 0px 0px 0px white, 2px 0px 0px 0px white;
-            box-shadow: calc(-1px + @minus-px) 0px 0px 0px white, calc(3px - @scaled-one-px-value) 0px 0px 0px white;
+            border-width: 6px;
+            border-color: transparent white transparent #fff;
+            box-shadow: -2px 0px 0px 0px white, 2px 0px 0px 0px #fff;
             border-radius: @scaled-one-px-value-ie;
             border-radius: @scaled-one-px-value;
             top: 0px;
             left: 2px;
-            left: calc(1px + @scaled-one-px-value);
 
         }
         &:after{
             width: 16px;
-            width: calc(15px + @scaled-one-px-value);
-            border-width: 5px 5px 5px 5px;
-            border-width: calc(4px + @scaled-one-px-value);
-            border-color: transparent black transparent black;
-            box-shadow: -1px 0px 0px 0px black, 1px 0px 0px 0px black;
-            box-shadow: @minus-px 0px 0px 0px black, @scaled-one-px-value 0px 0px 0px black;
+            border-width: 5px 4.5px;
+            border-color: transparent black transparent #000;
+            box-shadow: -1px 0px 0px 0px black, 1px 0px 0px 0px #000;
             position: absolute;
-            top: @scaled-one-px-value-ie;
-            left: @scaled-one-px-value-ie;
-            top:  calc(2px - @scaled-one-px-value);
-            left: calc(3px - @scaled-one-px-value);
+            top:  @scaled-one-px-value-ie;
+            top:  @scaled-one-px-value;
+            left: 2px;
 
         }
-        //background-position: -12px -196px;
     }
 
     .empty-color {

@@ -525,6 +525,10 @@ SSE.ApplicationController = new(function(){
                 message = me.errorTokenExpire;
                 break;
 
+            case Asc.c_oAscError.ID.SessionToken:
+                message = me.errorSessionToken;
+                break;
+
             case Asc.c_oAscError.ID.ConvertationOpenFormat:
                 if (errData === 'pdf')
                     message = me.errorInconsistentExtPdf.replace('%1', docConfig.fileType || '');
@@ -749,6 +753,7 @@ SSE.ApplicationController = new(function(){
         errorInconsistentExtXlsx: 'An error has occurred while opening the file.<br>The file content corresponds to spreadsheets (e.g. xlsx), but the file has the inconsistent extension: %1.',
         errorInconsistentExtPptx: 'An error has occurred while opening the file.<br>The file content corresponds to presentations (e.g. pptx), but the file has the inconsistent extension: %1.',
         errorInconsistentExtPdf: 'An error has occurred while opening the file.<br>The file content corresponds to one of the following formats: pdf/djvu/xps/oxps, but the file has the inconsistent extension: %1.',
-        errorInconsistentExt: 'An error has occurred while opening the file.<br>The file content does not match the file extension.'
+        errorInconsistentExt: 'An error has occurred while opening the file.<br>The file content does not match the file extension.',
+        errorSessionToken: 'The connection to the server has been interrupted. Please, reload the page.'
     }
 })();

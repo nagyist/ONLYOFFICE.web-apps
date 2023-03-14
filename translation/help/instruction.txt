@@ -35,3 +35,23 @@
         <div class="big big-имя_файла_без_расширения"></div>
     c) Для изображений из папки big:
         <div class="smb smb-имя_файла_без_расширения"></div>
+
+
+
+Для генерации файлов indexes.js нужен python версии 3.6+
+
+1. Запустите терминал(командную строку)
+
+2. Передите в папку  web-apps/translation/help c помощью команды: cd путь_к_папке
+    (ВНИМАНИЕ! [для windows] ecли папка лежит не на дике С, перейти на другой диск  можно комадой "cd Буква_диска:" после нажать "enter" ([Пример:] cd F:))
+
+3. Запустить скрипт командой: python generate_indexes.py
+
+   если в результате работы программы в файлах indexes.js будет содержаться только текст "var indexes = [", нужно выполнить
+   для windows:
+        python -m pip install bs4
+        python -m pip install lxml
+
+    для остальных os:
+        python pip install bs4
+        python pip install lxml
